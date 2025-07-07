@@ -1,9 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { Bell, ChevronRight } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { Bell, ChevronRight, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { SidebarTrigger } from "@/components/ui/sidebar"
+import { useSidebar } from "@/components/ui/sidebar"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import {
@@ -17,6 +18,7 @@ import {
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { createClient } from "@/lib/supabase/client"
 
 const announcements = [
   {
@@ -72,7 +74,15 @@ const announcements = [
 
 export function DashboardHeader() {
   const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const router = useRouter()
+  const supabase = createClient()
+  const { toggleSidebar } = useSidebar()
   const unreadCount = announcements.filter((a) => !a.read).length
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut()
+    router.push("/")
+  }
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -103,7 +113,9 @@ export function DashboardHeader() {
   return (
     <header className="flex h-16 items-center justify-between border-b bg-white px-6">
       <div className="flex items-center space-x-4">
-        <SidebarTrigger className="md:hidden" />
+        <Button variant="ghost" size="icon" onClick={toggleSidebar}>
+          <Menu className="h-5 w-5" />
+        </Button>
         <div className="flex items-center space-x-2 text-sm text-gray-600">
           <span className="font-medium text-blue-600">UC</span>
           <ChevronRight className="h-4 w-4" />
@@ -177,10 +189,10 @@ export function DashboardHeader() {
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Profile</DropdownMenuItem>
-            <DropdownMenuItem>Settings</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push("/dashboard/profile")}>Profile</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push("/dashboard/settings")}>Settings</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Sign out</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleSignOut}>Sign out</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

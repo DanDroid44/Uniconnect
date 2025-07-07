@@ -1,6 +1,6 @@
 "use client"
 
-import { Home, Calendar, BookOpen, GraduationCap, CreditCard, User, Settings } from "lucide-react"
+import { Home, Users, UserPlus, UserMinus, CreditCard, Megaphone, FileText, Settings, User } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
@@ -17,15 +17,17 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 const menuItems = [
   { title: "Dashboard", url: "/dashboard", icon: Home },
-  { title: "Schedule", url: "/dashboard/schedule", icon: Calendar },
-  { title: "Courses", url: "/dashboard/courses", icon: BookOpen },
-  { title: "Grades", url: "/dashboard/grades", icon: GraduationCap },
-  { title: "Finance", url: "/dashboard/finance", icon: CreditCard },
+  { title: "Students", url: "/dashboard/students", icon: Users },
+  { title: "Add Student", url: "/dashboard/students/add", icon: UserPlus },
+  { title: "Remove Student", url: "/dashboard/students/remove", icon: UserMinus },
+  { title: "Payment Status", url: "/dashboard/payments", icon: CreditCard },
+  { title: "Announcements", url: "/dashboard/announcements", icon: Megaphone },
+  { title: "Set Tests", url: "/dashboard/tests", icon: FileText },
   { title: "Profile", url: "/dashboard/profile", icon: User },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ]
 
-export function AppSidebar() {
+export function CoordinatorSidebar() {
   const pathname = usePathname()
 
   return (
@@ -57,11 +59,11 @@ export function AppSidebar() {
       <SidebarFooter className="p-4">
         <div className="flex items-center space-x-3 p-2 rounded-lg bg-gray-50 group-data-[collapsible=icon]:justify-center">
           <Avatar className="h-8 w-8">
-            <AvatarFallback>DD</AvatarFallback>
+            <AvatarFallback>JS</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0 group-data-[collapsible=icon]:hidden">
-            <p className="text-sm font-medium text-gray-900 truncate">Daniel Darsamo</p>
-            <p className="text-xs text-gray-500 truncate">Student</p>
+            <p className="text-sm font-medium text-gray-900 truncate">Dr. João Silva</p>
+            <p className="text-xs text-gray-500 truncate">Coordinator</p>
           </div>
         </div>
       </SidebarFooter>
