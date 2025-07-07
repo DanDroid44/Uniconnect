@@ -1,153 +1,155 @@
--- Create custom types
-CREATE TYPE user_role AS ENUM ('student', 'lecturer', 'coordinator');
-CREATE TYPE faculty_type AS ENUM ('computer-science', 'business-management', 'accounting');
-CREATE TYPE payment_status AS ENUM ('pending', 'paid', 'overdue');
-CREATE TYPE announcement_priority AS ENUM ('low', 'medium', 'high');
+-- Enable necessary extensions
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Users table (extends Supabase auth.users)
-CREATE TABLE public.profiles (
-    id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
+-- Create custom types
+CREATE TYPE user_role AS ENUM ('student', 'lecturer', 'coordinator', 'admin');
+CREATE TYPE payment_status AS ENUM ('pending', 'paid', 'partial', 'overdue');
+CREATE TYPE transaction_type AS ENUM ('tuition', 'fee', 'payment', 'refund');
+CREATE TYPE enrollment_status AS ENUM ('active', 'dropped', 'completed', 'withdrawn');
+CREATE TYPE announcement_priority AS ENUM ('low', 'medium', 'high', 'urgent');
+
+-- Create profiles table (extends auth.users)
+CREATE TABLE profiles (
+    id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
+    email TEXT UNIQUE NOT NULL,
     full_name TEXT NOT NULL,
-    role user_role NOT NULL,
-    faculty faculty_type,
+    role user_role NOT NULL DEFAULT 'student',
+    faculty TEXT,
+    year TEXT,
     student_id TEXT UNIQUE,
     phone TEXT,
     address TEXT,
-    enrollment_date DATE DEFAULT CURRENT_DATE,
+    avatar_url TEXT,
+    date_of_birth DATE,
+    emergency_contact TEXT,
+    emergency_phone TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Courses table
-CREATE TABLE public.courses (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    code TEXT NOT NULL UNIQUE,
+-- Create courses table
+CREATE TABLE courses (
+    id SERIAL PRIMARY KEY,
+    code TEXT UNIQUE NOT NULL,
     name TEXT NOT NULL,
     description TEXT,
     credits INTEGER NOT NULL DEFAULT 3,
-    faculty faculty_type NOT NULL,
-    semester INTEGER NOT NULL CHECK (semester IN (1, 2)),
-    year INTEGER NOT NULL,
-    coordinator_id UUID REFERENCES public.profiles(id),
-    lecturer_id UUID REFERENCES public.profiles(id),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    faculty TEXT NOT NULL,
+    semester TEXT NOT NULL,
+    lecturer_id UUID REFERENCES profiles(id),
+    max_enrollment INTEGER DEFAULT 50,
+    schedule TEXT,
+    room TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Student enrollments
-CREATE TABLE public.enrollments (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    student_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
-    course_id UUID REFERENCES public.courses(id) ON DELETE CASCADE,
-    enrollment_date DATE DEFAULT CURRENT_DATE,
-    status TEXT DEFAULT 'active',
+-- Create enrollments table
+CREATE TABLE enrollments (
+    id SERIAL PRIMARY KEY,
+    student_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+    course_id INTEGER REFERENCES courses(id) ON DELETE CASCADE,
+    enrollment_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    status enrollment_status NOT NULL DEFAULT 'active',
+    grade TEXT,
+    gpa DECIMAL(3,2),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     UNIQUE(student_id, course_id)
 );
 
--- Assessments table
-CREATE TABLE public.assessments (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    course_id UUID REFERENCES public.courses(id) ON DELETE CASCADE,
-    student_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
-    type TEXT NOT NULL CHECK (type IN ('test1', 'test2', 'assignment1', 'assignment2', 'exam')),
+-- Create grades table
+CREATE TABLE grades (
+    id SERIAL PRIMARY KEY,
+    student_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+    course_id INTEGER REFERENCES courses(id) ON DELETE CASCADE,
+    assignment_name TEXT NOT NULL,
     score DECIMAL(5,2),
     max_score DECIMAL(5,2) NOT NULL DEFAULT 100,
-    weight DECIMAL(3,2) NOT NULL,
-    date_assigned DATE DEFAULT CURRENT_DATE,
-    due_date DATE,
-    submitted_at TIMESTAMP WITH TIME ZONE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    weight DECIMAL(5,2) NOT NULL DEFAULT 0,
+    grade_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    comments TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Financial records
-CREATE TABLE public.financial_records (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    student_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
+-- Create financial_records table
+CREATE TABLE financial_records (
+    id SERIAL PRIMARY KEY,
+    student_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+    transaction_type transaction_type NOT NULL,
     amount DECIMAL(10,2) NOT NULL,
-    type TEXT NOT NULL CHECK (type IN ('tuition', 'subject_fee', 'other')),
+    currency TEXT NOT NULL DEFAULT 'MZN',
     description TEXT,
-    due_date DATE NOT NULL,
+    due_date DATE,
     payment_date DATE,
-    status payment_status DEFAULT 'pending',
-    academic_year INTEGER NOT NULL,
-    semester INTEGER NOT NULL CHECK (semester IN (1, 2)),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    status payment_status NOT NULL DEFAULT 'pending',
+    reference_number TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Announcements
-CREATE TABLE public.announcements (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+-- Create announcements table
+CREATE TABLE announcements (
+    id SERIAL PRIMARY KEY,
     title TEXT NOT NULL,
     content TEXT NOT NULL,
-    priority announcement_priority DEFAULT 'medium',
-    author_id UUID REFERENCES public.profiles(id),
-    target_role user_role,
-    target_faculty faculty_type,
-    target_course_id UUID REFERENCES public.courses(id),
-    published_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    priority announcement_priority NOT NULL DEFAULT 'medium',
+    author TEXT NOT NULL,
+    target_audience TEXT NOT NULL DEFAULT 'students',
+    faculty TEXT,
+    is_published BOOLEAN NOT NULL DEFAULT true,
     expires_at TIMESTAMP WITH TIME ZONE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    created_by UUID REFERENCES profiles(id),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Class schedules
-CREATE TABLE public.class_schedules (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    course_id UUID REFERENCES public.courses(id) ON DELETE CASCADE,
-    day_of_week INTEGER NOT NULL CHECK (day_of_week BETWEEN 1 AND 7),
+-- Create schedule table
+CREATE TABLE schedule (
+    id SERIAL PRIMARY KEY,
+    student_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+    course_id INTEGER REFERENCES courses(id) ON DELETE CASCADE,
+    day_of_week INTEGER NOT NULL CHECK (day_of_week >= 0 AND day_of_week <= 6),
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
     room TEXT,
-    building TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Enable Row Level Security on all tables
-ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.courses ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.enrollments ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.assessments ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.financial_records ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.announcements ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.class_schedules ENABLE ROW LEVEL SECURITY;
+-- Create attendance table
+CREATE TABLE attendance (
+    id SERIAL PRIMARY KEY,
+    student_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+    course_id INTEGER REFERENCES courses(id) ON DELETE CASCADE,
+    date DATE NOT NULL DEFAULT CURRENT_DATE,
+    status TEXT NOT NULL DEFAULT 'present' CHECK (status IN ('present', 'absent', 'late', 'excused')),
+    notes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(student_id, course_id, date)
+);
 
--- RLS Policies for profiles
-CREATE POLICY "Users can view own profile" ON public.profiles
-    FOR SELECT USING (auth.uid() = id);
+-- Create indexes for better performance
+CREATE INDEX idx_profiles_role ON profiles(role);
+CREATE INDEX idx_profiles_faculty ON profiles(faculty);
+CREATE INDEX idx_profiles_student_id ON profiles(student_id);
+CREATE INDEX idx_courses_faculty ON courses(faculty);
+CREATE INDEX idx_courses_lecturer ON courses(lecturer_id);
+CREATE INDEX idx_enrollments_student ON enrollments(student_id);
+CREATE INDEX idx_enrollments_course ON enrollments(course_id);
+CREATE INDEX idx_enrollments_status ON enrollments(status);
+CREATE INDEX idx_grades_student ON grades(student_id);
+CREATE INDEX idx_grades_course ON grades(course_id);
+CREATE INDEX idx_financial_student ON financial_records(student_id);
+CREATE INDEX idx_financial_status ON financial_records(status);
+CREATE INDEX idx_announcements_audience ON announcements(target_audience);
+CREATE INDEX idx_announcements_faculty ON announcements(faculty);
+CREATE INDEX idx_schedule_student ON schedule(student_id);
+CREATE INDEX idx_attendance_student ON attendance(student_id);
 
-CREATE POLICY "Users can update own profile" ON public.profiles
-    FOR UPDATE USING (auth.uid() = id);
-
--- RLS Policies for enrollments
-CREATE POLICY "Students can view own enrollments" ON public.enrollments
-    FOR SELECT USING (
-        auth.uid() = student_id OR 
-        EXISTS (
-            SELECT 1 FROM public.profiles 
-            WHERE id = auth.uid() AND role IN ('lecturer', 'coordinator')
-        )
-    );
-
--- RLS Policies for assessments
-CREATE POLICY "Students can view own assessments" ON public.assessments
-    FOR SELECT USING (
-        auth.uid() = student_id OR
-        EXISTS (
-            SELECT 1 FROM public.courses c
-            JOIN public.profiles p ON p.id = auth.uid()
-            WHERE c.id = course_id AND (c.lecturer_id = auth.uid() OR c.coordinator_id = auth.uid())
-        )
-    );
-
--- RLS Policies for financial records
-CREATE POLICY "Students can view own financial records" ON public.financial_records
-    FOR SELECT USING (
-        auth.uid() = student_id OR
-        EXISTS (
-            SELECT 1 FROM public.profiles 
-            WHERE id = auth.uid() AND role = 'coordinator'
-        )
-    );
-
--- Functions and triggers for updated_at
+-- Create updated_at trigger function
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -156,24 +158,12 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
-CREATE TRIGGER update_profiles_updated_at BEFORE UPDATE ON public.profiles
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
--- Function to calculate final grade
-CREATE OR REPLACE FUNCTION calculate_final_grade(p_student_id UUID, p_course_id UUID)
-RETURNS DECIMAL(5,2) AS $$
-DECLARE
-    final_grade DECIMAL(5,2) := 0;
-    assessment_record RECORD;
-BEGIN
-    FOR assessment_record IN 
-        SELECT type, score, max_score, weight 
-        FROM public.assessments 
-        WHERE student_id = p_student_id AND course_id = p_course_id AND score IS NOT NULL
-    LOOP
-        final_grade := final_grade + (assessment_record.score / assessment_record.max_score * assessment_record.weight * 100);
-    END LOOP;
-    
-    RETURN final_grade;
-END;
-$$ LANGUAGE plpgsql;
+-- Create triggers for updated_at
+CREATE TRIGGER update_profiles_updated_at BEFORE UPDATE ON profiles FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_courses_updated_at BEFORE UPDATE ON courses FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_enrollments_updated_at BEFORE UPDATE ON enrollments FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_grades_updated_at BEFORE UPDATE ON grades FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_financial_records_updated_at BEFORE UPDATE ON financial_records FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_announcements_updated_at BEFORE UPDATE ON announcements FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_schedule_updated_at BEFORE UPDATE ON schedule FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_attendance_updated_at BEFORE UPDATE ON attendance FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
