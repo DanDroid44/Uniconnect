@@ -11,7 +11,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-// Mock data for students
 const mockStudents = [
   {
     id: "1",
@@ -71,7 +70,7 @@ const mockStudents = [
 ]
 
 export default function StudentsPage() {
-  const [students, setStudents] = useState(mockStudents)
+  const [students] = useState(mockStudents)
   const [searchTerm, setSearchTerm] = useState("")
   const [facultyFilter, setFacultyFilter] = useState("all")
   const [paymentFilter, setPaymentFilter] = useState("all")
@@ -121,7 +120,6 @@ export default function StudentsPage() {
         </Button>
       </div>
 
-      {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-2">
@@ -157,7 +155,6 @@ export default function StudentsPage() {
         </Card>
       </div>
 
-      {/* Filters */}
       <Card>
         <CardHeader>
           <CardTitle>Student List</CardTitle>

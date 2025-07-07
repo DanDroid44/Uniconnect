@@ -2,12 +2,11 @@
 
 import type React from "react"
 import { useEffect, useState } from "react"
-import { SidebarProvider } from "@/components/ui/sidebar"
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/dashboard/app-sidebar"
 import { CoordinatorSidebar } from "@/components/dashboard/coordinator-sidebar"
 import { LecturerSidebar } from "@/components/dashboard/lecturer-sidebar"
 import { DashboardHeader } from "@/components/dashboard/dashboard-header"
-import { SidebarInset } from "@/components/ui/sidebar"
 import { createClient } from "@/lib/supabase/client"
 
 export default function DashboardLayout({
@@ -27,7 +26,6 @@ export default function DashboardLayout({
 
       if (user) {
         const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
-
         setUserRole(profile?.role || user.user_metadata?.role || "student")
       }
       setLoading(false)

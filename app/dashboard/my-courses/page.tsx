@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 
-// Mock data for lecturer courses
 const mockCourses = [
   {
     id: "1",
@@ -73,7 +72,6 @@ export default function MyCoursesPage() {
         </div>
       </div>
 
-      {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-2">
@@ -113,7 +111,6 @@ export default function MyCoursesPage() {
         </Card>
       </div>
 
-      {/* Course List */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {courses.map((course) => (
           <Card key={course.id}>
@@ -174,7 +171,6 @@ export default function MyCoursesPage() {
         ))}
       </div>
 
-      {/* Recent Activity */}
       <Card>
         <CardHeader>
           <CardTitle>Recent Activity</CardTitle>
