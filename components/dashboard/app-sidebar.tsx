@@ -29,21 +29,18 @@ export function AppSidebar() {
   const pathname = usePathname()
 
   return (
-    <Sidebar collapsible="icon" className="border-r">
+    <Sidebar className="border-r">
       <SidebarHeader className="p-4">
-        <div className="flex items-center justify-center">
-          <Link href="/dashboard" className="flex items-center space-x-2">
-            <span className="text-xl font-bold text-blue-600 group-data-[collapsible=icon]:hidden">UniConnect</span>
-            <span className="text-xl font-bold text-blue-600 group-data-[collapsible=icon]:block hidden">UC</span>
-          </Link>
-        </div>
+        <Link href="/dashboard" className="flex items-center space-x-2">
+          <span className="text-xl font-bold text-blue-600">UniConnect</span>
+        </Link>
       </SidebarHeader>
 
       <SidebarContent className="px-2">
         <SidebarMenu>
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild isActive={pathname === item.url} tooltip={item.title}>
+              <SidebarMenuButton asChild isActive={pathname === item.url} className="w-full justify-start">
                 <Link href={item.url} className="flex items-center space-x-3 px-3 py-2">
                   <item.icon className="h-5 w-5" />
                   <span>{item.title}</span>
@@ -55,11 +52,11 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-4">
-        <div className="flex items-center space-x-3 p-2 rounded-lg bg-gray-50 group-data-[collapsible=icon]:justify-center">
+        <div className="flex items-center space-x-3 p-2 rounded-lg bg-gray-50">
           <Avatar className="h-8 w-8">
             <AvatarFallback>DD</AvatarFallback>
           </Avatar>
-          <div className="flex-1 min-w-0 group-data-[collapsible=icon]:hidden">
+          <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-gray-900 truncate">Daniel Darsamo</p>
             <p className="text-xs text-gray-500 truncate">Student</p>
           </div>

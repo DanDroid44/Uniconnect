@@ -1,308 +1,268 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { Search, UserPlus, Eye, Edit, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Search, Filter, UserPlus, Mail, Phone, MapPin, Calendar, CheckCircle, XCircle } from "lucide-react"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-const students = [
+// Mock data for students
+const mockStudents = [
   {
-    id: "CS2024001",
-    name: "Daniel Darsamo",
-    email: "daniel.darsamo@stu.edu.mz",
+    id: "1",
+    name: "João Silva",
+    email: "joao.silva@student.stu.ac.mz",
+    studentId: "CS2024001",
+    faculty: "Computer Science",
+    year: "2nd Year",
+    paymentStatus: "paid",
+    enrollmentDate: "2024-01-15",
     phone: "+258 84 123 4567",
-    address: "Maputo, Mozambique",
-    enrollmentDate: "2024-01-15",
-    year: "2nd Year",
-    gpa: 3.37,
-    paymentStatus: "paid",
-    totalFees: 31250,
-    paidAmount: 23190,
-    outstandingAmount: 8060,
-    courses: ["CS101", "MATH201", "ENG202", "PSYC101", "HIST105", "PHIL101"],
   },
   {
-    id: "CS2024002",
-    name: "Ana Costa Silva",
-    email: "ana.costa@stu.edu.mz",
-    phone: "+258 84 234 5678",
-    address: "Beira, Mozambique",
-    enrollmentDate: "2024-01-15",
-    year: "2nd Year",
-    gpa: 3.65,
+    id: "2",
+    name: "Maria Santos",
+    email: "maria.santos@student.stu.ac.mz",
+    studentId: "BM2024002",
+    faculty: "Business Management",
+    year: "1st Year",
     paymentStatus: "partial",
-    totalFees: 31250,
-    paidAmount: 15625,
-    outstandingAmount: 15625,
-    courses: ["CS101", "MATH201", "ENG202", "PSYC101", "HIST105"],
+    enrollmentDate: "2024-01-20",
+    phone: "+258 85 234 5678",
   },
   {
-    id: "CS2024003",
+    id: "3",
     name: "Carlos Mendes",
-    email: "carlos.mendes@stu.edu.mz",
-    phone: "+258 84 345 6789",
-    address: "Nampula, Mozambique",
-    enrollmentDate: "2024-01-15",
-    year: "2nd Year",
-    gpa: 3.12,
+    email: "carlos.mendes@student.stu.ac.mz",
+    studentId: "AC2024003",
+    faculty: "Accounting",
+    year: "3rd Year",
     paymentStatus: "overdue",
-    totalFees: 31250,
-    paidAmount: 5670,
-    outstandingAmount: 25580,
-    courses: ["CS101", "MATH201", "ENG202", "PSYC101"],
+    enrollmentDate: "2023-01-10",
+    phone: "+258 86 345 6789",
   },
   {
-    id: "CS2023001",
-    name: "Isabel Rodrigues",
-    email: "isabel.rodrigues@stu.edu.mz",
-    phone: "+258 84 456 7890",
-    address: "Quelimane, Mozambique",
-    enrollmentDate: "2023-01-15",
-    year: "3rd Year",
-    gpa: 3.78,
+    id: "4",
+    name: "Ana Costa",
+    email: "ana.costa@student.stu.ac.mz",
+    studentId: "CS2024004",
+    faculty: "Computer Science",
+    year: "2nd Year",
     paymentStatus: "paid",
-    totalFees: 31250,
-    paidAmount: 31250,
-    outstandingAmount: 0,
-    courses: ["CS301", "CS302", "MATH301", "ENG301", "PROJ301"],
+    enrollmentDate: "2024-01-18",
+    phone: "+258 87 456 7890",
   },
   {
-    id: "CS2023002",
-    name: "António Pereira",
-    email: "antonio.pereira@stu.edu.mz",
-    phone: "+258 84 567 8901",
-    address: "Tete, Mozambique",
-    enrollmentDate: "2023-01-15",
-    year: "3rd Year",
-    gpa: 3.45,
-    paymentStatus: "partial",
-    totalFees: 31250,
-    paidAmount: 20000,
-    outstandingAmount: 11250,
-    courses: ["CS301", "CS302", "MATH301", "ENG301"],
+    id: "5",
+    name: "Pedro Oliveira",
+    email: "pedro.oliveira@student.stu.ac.mz",
+    studentId: "BM2024005",
+    faculty: "Business Management",
+    year: "1st Year",
+    paymentStatus: "paid",
+    enrollmentDate: "2024-01-25",
+    phone: "+258 88 567 8901",
   },
 ]
 
 export default function StudentsPage() {
+  const [students, setStudents] = useState(mockStudents)
   const [searchTerm, setSearchTerm] = useState("")
-  const [selectedTab, setSelectedTab] = useState("all")
+  const [facultyFilter, setFacultyFilter] = useState("all")
+  const [paymentFilter, setPaymentFilter] = useState("all")
 
   const filteredStudents = students.filter((student) => {
     const matchesSearch =
       student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.email.toLowerCase().includes(searchTerm.toLowerCase())
+      student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.studentId.toLowerCase().includes(searchTerm.toLowerCase())
 
-    if (selectedTab === "all") return matchesSearch
-    if (selectedTab === "paid") return matchesSearch && student.paymentStatus === "paid"
-    if (selectedTab === "partial") return matchesSearch && student.paymentStatus === "partial"
-    if (selectedTab === "overdue") return matchesSearch && student.paymentStatus === "overdue"
+    const matchesFaculty = facultyFilter === "all" || student.faculty === facultyFilter
+    const matchesPayment = paymentFilter === "all" || student.paymentStatus === paymentFilter
 
-    return matchesSearch
+    return matchesSearch && matchesFaculty && matchesPayment
   })
 
-  const getPaymentStatusBadge = (status: string) => {
+  const getPaymentBadge = (status: string) => {
     switch (status) {
       case "paid":
-        return (
-          <Badge className="bg-green-100 text-green-800">
-            <CheckCircle className="h-3 w-3 mr-1" />
-            Paid
-          </Badge>
-        )
+        return <Badge className="bg-green-100 text-green-800">Paid</Badge>
       case "partial":
-        return <Badge variant="secondary">Partial</Badge>
+        return <Badge className="bg-yellow-100 text-yellow-800">Partial</Badge>
       case "overdue":
-        return (
-          <Badge variant="destructive">
-            <XCircle className="h-3 w-3 mr-1" />
-            Overdue
-          </Badge>
-        )
+        return <Badge className="bg-red-100 text-red-800">Overdue</Badge>
       default:
         return <Badge variant="outline">{status}</Badge>
     }
   }
 
-  const formatCurrency = (amount: number) => {
-    return `${amount.toLocaleString()} MT`
+  const stats = {
+    total: students.length,
+    paid: students.filter((s) => s.paymentStatus === "paid").length,
+    partial: students.filter((s) => s.paymentStatus === "partial").length,
+    overdue: students.filter((s) => s.paymentStatus === "overdue").length,
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Students Management</h1>
-          <p className="text-gray-600 mt-1">Computer Science Faculty - Manage student records and payments</p>
+          <h1 className="text-3xl font-bold">Student Management</h1>
+          <p className="text-gray-600">Manage all students in your faculty</p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700">
-          <UserPlus className="h-4 w-4 mr-2" />
-          Add New Student
+        <Button>
+          <UserPlus className="mr-2 h-4 w-4" />
+          Add Student
         </Button>
       </div>
 
-      {/* Search and Filter */}
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Total Students</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.total}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Paid</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">{stats.paid}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Partial Payment</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-yellow-600">{stats.partial}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Overdue</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">{stats.overdue}</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filters */}
       <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center space-x-4">
-            <div className="flex-1 relative">
+        <CardHeader>
+          <CardTitle>Student List</CardTitle>
+          <CardDescription>View and manage all students</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
-                placeholder="Search students by name, ID, or email..."
+                placeholder="Search students..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
               />
             </div>
-            <Button variant="outline">
-              <Filter className="h-4 w-4 mr-2" />
-              Filter
-            </Button>
+            <Select value={facultyFilter} onValueChange={setFacultyFilter}>
+              <SelectTrigger className="w-full sm:w-[200px]">
+                <SelectValue placeholder="Filter by Faculty" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Faculties</SelectItem>
+                <SelectItem value="Computer Science">Computer Science</SelectItem>
+                <SelectItem value="Business Management">Business Management</SelectItem>
+                <SelectItem value="Accounting">Accounting</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={paymentFilter} onValueChange={setPaymentFilter}>
+              <SelectTrigger className="w-full sm:w-[200px]">
+                <SelectValue placeholder="Filter by Payment" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Payments</SelectItem>
+                <SelectItem value="paid">Paid</SelectItem>
+                <SelectItem value="partial">Partial</SelectItem>
+                <SelectItem value="overdue">Overdue</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Student</TableHead>
+                  <TableHead>Student ID</TableHead>
+                  <TableHead>Faculty</TableHead>
+                  <TableHead>Year</TableHead>
+                  <TableHead>Payment Status</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredStudents.map((student) => (
+                  <TableRow key={student.id}>
+                    <TableCell>
+                      <div className="flex items-center space-x-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback>
+                            {student.name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium">{student.name}</div>
+                          <div className="text-sm text-gray-500">{student.email}</div>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-mono">{student.studentId}</TableCell>
+                    <TableCell>{student.faculty}</TableCell>
+                    <TableCell>{student.year}</TableCell>
+                    <TableCell>{getPaymentBadge(student.paymentStatus)}</TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            Actions
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuItem>
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit Student
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="text-red-600">
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Remove Student
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         </CardContent>
       </Card>
-
-      {/* Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Students</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{students.length}</div>
-            <p className="text-xs text-muted-foreground">Computer Science Faculty</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Paid Fees</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{students.filter((s) => s.paymentStatus === "paid").length}</div>
-            <p className="text-xs text-muted-foreground">Students with full payment</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Partial Payment</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{students.filter((s) => s.paymentStatus === "partial").length}</div>
-            <p className="text-xs text-muted-foreground">Students with partial payment</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Overdue</CardTitle>
-            <XCircle className="h-4 w-4 text-red-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{students.filter((s) => s.paymentStatus === "overdue").length}</div>
-            <p className="text-xs text-muted-foreground">Students with overdue payments</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Students List */}
-      <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-        <TabsList>
-          <TabsTrigger value="all">All Students ({students.length})</TabsTrigger>
-          <TabsTrigger value="paid">Paid ({students.filter((s) => s.paymentStatus === "paid").length})</TabsTrigger>
-          <TabsTrigger value="partial">
-            Partial ({students.filter((s) => s.paymentStatus === "partial").length})
-          </TabsTrigger>
-          <TabsTrigger value="overdue">
-            Overdue ({students.filter((s) => s.paymentStatus === "overdue").length})
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value={selectedTab} className="space-y-4">
-          {filteredStudents.map((student) => (
-            <Card key={student.id} className="hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start space-x-4">
-                    <Avatar className="h-12 w-12">
-                      <AvatarFallback>
-                        {student.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <h3 className="text-lg font-semibold">{student.name}</h3>
-                        <Badge variant="outline">{student.id}</Badge>
-                        <Badge variant="secondary">{student.year}</Badge>
-                        {getPaymentStatusBadge(student.paymentStatus)}
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
-                        <div className="flex items-center space-x-2">
-                          <Mail className="h-4 w-4" />
-                          <span>{student.email}</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Phone className="h-4 w-4" />
-                          <span>{student.phone}</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <MapPin className="h-4 w-4" />
-                          <span>{student.address}</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Calendar className="h-4 w-4" />
-                          <span>Enrolled: {new Date(student.enrollmentDate).toLocaleDateString()}</span>
-                        </div>
-                      </div>
-
-                      <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                        <div>
-                          <span className="font-medium">GPA:</span>
-                          <span className="ml-2">{student.gpa.toFixed(2)}</span>
-                        </div>
-                        <div>
-                          <span className="font-medium">Courses:</span>
-                          <span className="ml-2">{student.courses.length} enrolled</span>
-                        </div>
-                        <div>
-                          <span className="font-medium">Outstanding:</span>
-                          <span
-                            className={`ml-2 ${student.outstandingAmount > 0 ? "text-red-600 font-semibold" : "text-green-600"}`}
-                          >
-                            {formatCurrency(student.outstandingAmount)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex space-x-2">
-                    <Button variant="outline" size="sm">
-                      View Details
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      Edit
-                    </Button>
-                    <Button variant="destructive" size="sm">
-                      Remove
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </TabsContent>
-      </Tabs>
     </div>
   )
 }
