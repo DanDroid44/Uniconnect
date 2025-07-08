@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import type { Language } from "@/lib/i18n"
@@ -17,7 +17,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // Load language from localStorage on mount
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       const savedLanguage = localStorage.getItem("uniconnect-language") as Language
       if (savedLanguage && (savedLanguage === "en" || savedLanguage === "pt")) {
         setLanguageState(savedLanguage)
@@ -27,7 +27,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang)
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       localStorage.setItem("uniconnect-language", lang)
     }
   }
