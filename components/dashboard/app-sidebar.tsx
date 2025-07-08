@@ -1,120 +1,71 @@
 "use client"
 
-import { Home, BookOpen, GraduationCap, CreditCard, Calendar, User, Settings, Bell } from "lucide-react"
+import { Home, Calendar, BookOpen, GraduationCap, CreditCard, User, Settings } from "lucide-react"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 const menuItems = [
-  {
-    title: "Academic",
-    items: [
-      {
-        title: "Dashboard",
-        url: "/dashboard",
-        icon: Home,
-      },
-      {
-        title: "Courses",
-        url: "/dashboard/courses",
-        icon: BookOpen,
-      },
-      {
-        title: "Grades",
-        url: "/dashboard/grades",
-        icon: GraduationCap,
-      },
-      {
-        title: "Schedule",
-        url: "/dashboard/schedule",
-        icon: Calendar,
-      },
-    ],
-  },
-  {
-    title: "Financial",
-    items: [
-      {
-        title: "Finance",
-        url: "/dashboard/finance",
-        icon: CreditCard,
-      },
-    ],
-  },
-  {
-    title: "Personal",
-    items: [
-      {
-        title: "Profile",
-        url: "/dashboard/profile",
-        icon: User,
-      },
-      {
-        title: "Settings",
-        url: "/dashboard/settings",
-        icon: Settings,
-      },
-    ],
-  },
+  { title: "Dashboard", url: "/dashboard", icon: Home },
+  { title: "Schedule", url: "/dashboard/schedule", icon: Calendar },
+  { title: "Courses", url: "/dashboard/courses", icon: BookOpen },
+  { title: "Grades", url: "/dashboard/grades", icon: GraduationCap },
+  { title: "Finance", url: "/dashboard/finance", icon: CreditCard },
+  { title: "Profile", url: "/dashboard/profile", icon: User },
+  { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ]
 
 export function AppSidebar() {
+  const pathname = usePathname()
+
   return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader>
-        <div className="flex items-center gap-2 px-2 py-2">
-          <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-blue-600 text-white">
-            <span className="text-sm font-bold">UC</span>
-          </div>
-          <div className="grid flex-1 text-left text-sm leading-tight">
-            <span className="truncate font-semibold">UniConnect</span>
-            <span className="truncate text-xs text-gray-500">Student Portal</span>
-          </div>
+    <Sidebar collapsible="icon" className="border-r">
+      <SidebarHeader className="p-4">
+        <div className="flex items-center justify-center">
+          <Link href="/dashboard" className="flex items-center space-x-2">
+            <span className="text-xl font-bold text-blue-600 group-data-[collapsible=icon]:hidden">UniConnect</span>
+            <span className="text-xl font-bold text-blue-600 group-data-[collapsible=icon]:block hidden">UC</span>
+          </Link>
         </div>
       </SidebarHeader>
-      <SidebarContent>
-        {menuItems.map((group) => (
-          <SidebarGroup key={group.title}>
-            <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {group.items.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild tooltip={item.title}>
-                      <a href={item.url}>
-                        <item.icon />
-                        <span>{item.title}</span>
-                      </a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        ))}
-      </SidebarContent>
-      <SidebarFooter>
+
+      <SidebarContent className="px-2">
         <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="Notifications">
-              <a href="/dashboard/notifications">
-                <Bell />
-                <span>Notifications</span>
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          {menuItems.map((item) => (
+            <SidebarMenuItem key={item.title}>
+              <SidebarMenuButton asChild isActive={pathname === item.url} tooltip={item.title}>
+                <Link href={item.url} className="flex items-center space-x-3 px-3 py-2">
+                  <item.icon className="h-5 w-5" />
+                  <span>{item.title}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
         </SidebarMenu>
+      </SidebarContent>
+
+      <SidebarFooter className="p-4">
+        <div className="flex items-center space-x-3 p-2 rounded-lg bg-gray-50 group-data-[collapsible=icon]:justify-center">
+          <Avatar className="h-8 w-8">
+            <AvatarFallback>DD</AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0 group-data-[collapsible=icon]:hidden">
+            <p className="text-sm font-medium text-gray-900 truncate">Daniel Darsamo</p>
+            <p className="text-xs text-gray-500 truncate">Student</p>
+          </div>
+        </div>
       </SidebarFooter>
+
       <SidebarRail />
     </Sidebar>
   )

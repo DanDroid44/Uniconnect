@@ -1,125 +1,73 @@
 "use client"
 
-import { Users, UserPlus, UserMinus, CreditCard, Megaphone, FileText, BarChart3, Settings } from "lucide-react"
+import { Home, Users, UserPlus, UserMinus, CreditCard, Megaphone, FileText, Settings, User } from "lucide-react"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 const menuItems = [
-  {
-    title: "Student Management",
-    items: [
-      {
-        title: "All Students",
-        url: "/dashboard/students",
-        icon: Users,
-      },
-      {
-        title: "Add Student",
-        url: "/dashboard/students/add",
-        icon: UserPlus,
-      },
-      {
-        title: "Remove Student",
-        url: "/dashboard/students/remove",
-        icon: UserMinus,
-      },
-    ],
-  },
-  {
-    title: "Financial Management",
-    items: [
-      {
-        title: "Payment Status",
-        url: "/dashboard/payments",
-        icon: CreditCard,
-      },
-    ],
-  },
-  {
-    title: "Communication",
-    items: [
-      {
-        title: "Announcements",
-        url: "/dashboard/announcements",
-        icon: Megaphone,
-      },
-      {
-        title: "Set Tests",
-        url: "/dashboard/tests",
-        icon: FileText,
-      },
-    ],
-  },
-  {
-    title: "Reports",
-    items: [
-      {
-        title: "Analytics",
-        url: "/dashboard/analytics",
-        icon: BarChart3,
-      },
-    ],
-  },
+  { title: "Dashboard", url: "/dashboard", icon: Home },
+  { title: "Students", url: "/dashboard/students", icon: Users },
+  { title: "Add Student", url: "/dashboard/students/add", icon: UserPlus },
+  { title: "Remove Student", url: "/dashboard/students/remove", icon: UserMinus },
+  { title: "Payment Status", url: "/dashboard/payments", icon: CreditCard },
+  { title: "Announcements", url: "/dashboard/announcements", icon: Megaphone },
+  { title: "Set Tests", url: "/dashboard/tests", icon: FileText },
+  { title: "Profile", url: "/dashboard/profile", icon: User },
+  { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ]
 
 export function CoordinatorSidebar() {
+  const pathname = usePathname()
+
   return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader>
-        <div className="flex items-center gap-2 px-2 py-2">
-          <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-blue-600 text-white">
-            <span className="text-sm font-bold">UC</span>
-          </div>
-          <div className="grid flex-1 text-left text-sm leading-tight">
-            <span className="truncate font-semibold">UniConnect</span>
-            <span className="truncate text-xs text-gray-500">Coordinator</span>
-          </div>
+    <Sidebar collapsible="icon" className="border-r">
+      <SidebarHeader className="p-4">
+        <div className="flex items-center justify-center">
+          <Link href="/dashboard" className="flex items-center space-x-2">
+            <span className="text-xl font-bold text-blue-600 group-data-[collapsible=icon]:hidden">UniConnect</span>
+            <span className="text-xl font-bold text-blue-600 group-data-[collapsible=icon]:block hidden">UC</span>
+          </Link>
         </div>
       </SidebarHeader>
-      <SidebarContent>
-        {menuItems.map((group) => (
-          <SidebarGroup key={group.title}>
-            <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {group.items.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild tooltip={item.title}>
-                      <a href={item.url}>
-                        <item.icon />
-                        <span>{item.title}</span>
-                      </a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        ))}
-      </SidebarContent>
-      <SidebarFooter>
+
+      <SidebarContent className="px-2">
         <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="Settings">
-              <a href="/dashboard/settings">
-                <Settings />
-                <span>Settings</span>
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          {menuItems.map((item) => (
+            <SidebarMenuItem key={item.title}>
+              <SidebarMenuButton asChild isActive={pathname === item.url} tooltip={item.title}>
+                <Link href={item.url} className="flex items-center space-x-3 px-3 py-2">
+                  <item.icon className="h-5 w-5" />
+                  <span>{item.title}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
         </SidebarMenu>
+      </SidebarContent>
+
+      <SidebarFooter className="p-4">
+        <div className="flex items-center space-x-3 p-2 rounded-lg bg-gray-50 group-data-[collapsible=icon]:justify-center">
+          <Avatar className="h-8 w-8">
+            <AvatarFallback>JS</AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0 group-data-[collapsible=icon]:hidden">
+            <p className="text-sm font-medium text-gray-900 truncate">Dr. João Silva</p>
+            <p className="text-xs text-gray-500 truncate">Coordinator</p>
+          </div>
+        </div>
       </SidebarFooter>
+
       <SidebarRail />
     </Sidebar>
   )

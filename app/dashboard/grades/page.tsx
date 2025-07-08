@@ -1,280 +1,239 @@
 "use client"
 
-import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { TrendingUp, TrendingDown, Minus, Award, BookOpen } from "lucide-react"
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts"
+import { TrendingUp, Award, BarChart3, Download } from "lucide-react"
 
 const currentSemesterGrades = [
   {
-    id: 1,
-    code: "CS101",
-    name: "Introduction to Computer Science",
-    credits: 3,
-    assignments: [
-      { name: "Assignment 1", score: 85, maxScore: 100, weight: 15 },
-      { name: "Assignment 2", score: 92, maxScore: 100, weight: 15 },
-      { name: "Midterm Exam", score: 78, maxScore: 100, weight: 30 },
-      { name: "Final Project", score: 88, maxScore: 100, weight: 25 },
-      { name: "Final Exam", score: null, maxScore: 100, weight: 15 },
+    courseCode: "CS101",
+    courseName: "Introduction to Computer Science",
+    assessments: [
+      { type: "Test 1", score: 85, maxScore: 100, weight: 20, date: "2025-02-15" },
+      { type: "Test 2", score: 90, maxScore: 100, weight: 20, date: "2025-03-01" },
+      { type: "Assignment 1", score: 95, maxScore: 100, weight: 10, date: "2025-02-20" },
+      { type: "Assignment 2", score: 88, maxScore: 100, weight: 10, date: "2025-03-05" },
+      { type: "Final Exam", score: null, maxScore: 100, weight: 40, date: "2025-03-20" },
     ],
-    currentGrade: "B+",
-    gpa: 3.3,
-    trend: "up",
+    currentGrade: 89.5,
+    letterGrade: "A-",
+    credits: 3,
   },
   {
-    id: 2,
-    code: "MATH201",
-    name: "Calculus II",
+    courseCode: "MATH201",
+    courseName: "Calculus II",
+    assessments: [
+      { type: "Test 1", score: 78, maxScore: 100, weight: 20, date: "2025-02-18" },
+      { type: "Test 2", score: 82, maxScore: 100, weight: 20, date: "2025-03-04" },
+      { type: "Assignment 1", score: 85, maxScore: 100, weight: 10, date: "2025-02-25" },
+      { type: "Assignment 2", score: 90, maxScore: 100, weight: 10, date: "2025-03-08" },
+      { type: "Final Exam", score: null, maxScore: 100, weight: 40, date: "2025-03-22" },
+    ],
+    currentGrade: 83.1,
+    letterGrade: "B+",
     credits: 4,
-    assignments: [
-      { name: "Quiz 1", score: 95, maxScore: 100, weight: 10 },
-      { name: "Quiz 2", score: 88, maxScore: 100, weight: 10 },
-      { name: "Midterm Exam", score: 82, maxScore: 100, weight: 35 },
-      { name: "Assignment 1", score: 90, maxScore: 100, weight: 20 },
-      { name: "Final Exam", score: null, maxScore: 100, weight: 25 },
-    ],
-    currentGrade: "A-",
-    gpa: 3.7,
-    trend: "up",
   },
   {
-    id: 3,
-    code: "ENG202",
-    name: "Technical Writing",
+    courseCode: "ENG202",
+    courseName: "Technical Writing",
+    assessments: [
+      { type: "Test 1", score: 92, maxScore: 100, weight: 25, date: "2025-02-22" },
+      { type: "Assignment 1", score: 88, maxScore: 100, weight: 25, date: "2025-02-28" },
+      { type: "Assignment 2", score: 94, maxScore: 100, weight: 25, date: "2025-03-10" },
+      { type: "Final Project", score: null, maxScore: 100, weight: 25, date: "2025-03-25" },
+    ],
+    currentGrade: 91.5,
+    letterGrade: "A-",
     credits: 2,
-    assignments: [
-      { name: "Essay 1", score: 75, maxScore: 100, weight: 25 },
-      { name: "Essay 2", score: 82, maxScore: 100, weight: 25 },
-      { name: "Presentation", score: 88, maxScore: 100, weight: 20 },
-      { name: "Final Portfolio", score: null, maxScore: 100, weight: 30 },
-    ],
-    currentGrade: "B",
-    gpa: 3.0,
-    trend: "stable",
   },
   {
-    id: 4,
-    code: "PSYC101",
-    name: "Introduction to Psychology",
-    credits: 3,
-    assignments: [
-      { name: "Quiz 1", score: 92, maxScore: 100, weight: 15 },
-      { name: "Quiz 2", score: 95, maxScore: 100, weight: 15 },
-      { name: "Research Paper", score: 88, maxScore: 100, weight: 30 },
-      { name: "Midterm Exam", score: 90, maxScore: 100, weight: 25 },
-      { name: "Final Exam", score: null, maxScore: 100, weight: 15 },
+    courseCode: "PSYC101",
+    courseName: "Introduction to Psychology",
+    assessments: [
+      { type: "Test 1", score: 87, maxScore: 100, weight: 20, date: "2025-02-19" },
+      { type: "Test 2", score: 84, maxScore: 100, weight: 20, date: "2025-03-02" },
+      { type: "Assignment 1", score: 91, maxScore: 100, weight: 15, date: "2025-02-26" },
+      { type: "Assignment 2", score: 89, maxScore: 100, weight: 15, date: "2025-03-07" },
+      { type: "Final Exam", score: null, maxScore: 100, weight: 30, date: "2025-03-21" },
     ],
-    currentGrade: "A",
-    gpa: 4.0,
-    trend: "up",
+    currentGrade: 87.65,
+    letterGrade: "B+",
+    credits: 3,
   },
   {
-    id: 5,
-    code: "HIST105",
-    name: "World History",
-    credits: 3,
-    assignments: [
-      { name: "Essay 1", score: 70, maxScore: 100, weight: 20 },
-      { name: "Essay 2", score: 75, maxScore: 100, weight: 20 },
-      { name: "Midterm Exam", score: 68, maxScore: 100, weight: 30 },
-      { name: "Group Project", score: 80, maxScore: 100, weight: 15 },
-      { name: "Final Exam", score: null, maxScore: 100, weight: 15 },
+    courseCode: "HIST105",
+    courseName: "World History",
+    assessments: [
+      { type: "Test 1", score: 79, maxScore: 100, weight: 25, date: "2025-02-21" },
+      { type: "Test 2", score: 83, maxScore: 100, weight: 25, date: "2025-03-06" },
+      { type: "Research Paper", score: 88, maxScore: 100, weight: 30, date: "2025-03-01" },
+      { type: "Final Exam", score: null, maxScore: 100, weight: 20, date: "2025-03-23" },
     ],
-    currentGrade: "C+",
-    gpa: 2.3,
-    trend: "down",
+    currentGrade: 83.25,
+    letterGrade: "B+",
+    credits: 3,
   },
   {
-    id: 6,
-    code: "PHIL101",
-    name: "Introduction to Philosophy",
-    credits: 3,
-    assignments: [
-      { name: "Essay 1", score: 95, maxScore: 100, weight: 25 },
-      { name: "Essay 2", score: 98, maxScore: 100, weight: 25 },
-      { name: "Midterm Exam", score: 92, maxScore: 100, weight: 25 },
-      { name: "Final Essay", score: 96, maxScore: 100, weight: 25 },
+    courseCode: "PHIL101",
+    courseName: "Introduction to Philosophy",
+    assessments: [
+      { type: "Test 1", score: 85, maxScore: 100, weight: 30, date: "2025-02-17" },
+      { type: "Essay 1", score: 90, maxScore: 100, weight: 35, date: "2025-02-28" },
+      { type: "Essay 2", score: null, maxScore: 100, weight: 35, date: "2025-03-15" },
     ],
-    currentGrade: "A+",
-    gpa: 4.0,
-    trend: "stable",
+    currentGrade: 88.25,
+    letterGrade: "B+",
+    credits: 2,
   },
 ]
 
-const previousSemesterGrades = [
+const previousSemesters = [
   {
-    code: "CS100",
-    name: "Programming Fundamentals",
-    credits: 3,
-    finalGrade: "A-",
-    gpa: 3.7,
+    semester: "Fall 2024",
+    gpa: 3.42,
+    courses: [
+      { code: "MATH101", name: "Calculus I", grade: "A", points: 4.0, credits: 4 },
+      { code: "CS100", name: "Programming Fundamentals", grade: "A-", points: 3.7, credits: 3 },
+      { code: "ENG101", name: "English Composition", grade: "B+", points: 3.3, credits: 3 },
+      { code: "PHYS101", name: "Physics I", grade: "B", points: 3.0, credits: 4 },
+      { code: "PHIL101", name: "Introduction to Philosophy", grade: "A", points: 4.0, credits: 2 },
+    ],
   },
   {
-    code: "MATH101",
-    name: "Calculus I",
-    credits: 4,
-    finalGrade: "B+",
-    gpa: 3.3,
+    semester: "Spring 2024",
+    gpa: 3.53,
+    courses: [
+      { code: "MATH102", name: "Linear Algebra", grade: "A-", points: 3.7, credits: 3 },
+      { code: "CS150", name: "Data Structures", grade: "B+", points: 3.3, credits: 4 },
+      { code: "STAT101", name: "Statistics", grade: "A", points: 4.0, credits: 3 },
+      { code: "ECON101", name: "Microeconomics", grade: "B", points: 3.0, credits: 3 },
+      { code: "PORT101", name: "Portuguese Language", grade: "A", points: 4.0, credits: 2 },
+    ],
   },
-  {
-    code: "ENG101",
-    name: "English Composition",
-    credits: 3,
-    finalGrade: "A",
-    gpa: 4.0,
-  },
-  {
-    code: "PHYS101",
-    name: "Physics I",
-    credits: 4,
-    finalGrade: "B",
-    gpa: 3.0,
-  },
-  {
-    code: "CHEM101",
-    name: "General Chemistry",
-    credits: 3,
-    finalGrade: "B+",
-    gpa: 3.3,
-  },
+]
+
+const gradeChartData = currentSemesterGrades.map((course) => ({
+  course: course.courseCode,
+  grade: course.currentGrade,
+}))
+
+const gpaHistory = [
+  { semester: "Spring 2024", gpa: 3.53 },
+  { semester: "Fall 2024", gpa: 3.42 },
+  { semester: "Spring 2025", gpa: 3.48 }, // Current estimated
 ]
 
 export default function GradesPage() {
-  const [selectedTab, setSelectedTab] = useState("current")
-
-  const currentSemesterGPA = (
-    currentSemesterGrades.reduce((sum, course) => sum + course.gpa * course.credits, 0) /
-    currentSemesterGrades.reduce((sum, course) => sum + course.credits, 0)
-  ).toFixed(2)
-
-  const previousSemesterGPA = (
-    previousSemesterGrades.reduce((sum, course) => sum + course.gpa * course.credits, 0) /
-    previousSemesterGrades.reduce((sum, course) => sum + course.credits, 0)
-  ).toFixed(2)
-
-  const cumulativeGPA = (
-    (currentSemesterGrades.reduce((sum, course) => sum + course.gpa * course.credits, 0) +
-      previousSemesterGrades.reduce((sum, course) => sum + course.gpa * course.credits, 0)) /
-    (currentSemesterGrades.reduce((sum, course) => sum + course.credits, 0) +
-      previousSemesterGrades.reduce((sum, course) => sum + course.credits, 0))
-  ).toFixed(2)
-
-  const getTrendIcon = (trend: string) => {
-    switch (trend) {
-      case "up":
-        return <TrendingUp className="h-4 w-4 text-green-600" />
-      case "down":
-        return <TrendingDown className="h-4 w-4 text-red-600" />
-      default:
-        return <Minus className="h-4 w-4 text-gray-600" />
-    }
-  }
-
-  const getGradeBadge = (grade: string) => {
-    if (grade.startsWith("A")) {
-      return <Badge className="bg-green-100 text-green-800">{grade}</Badge>
-    } else if (grade.startsWith("B")) {
-      return <Badge className="bg-blue-100 text-blue-800">{grade}</Badge>
-    } else if (grade.startsWith("C")) {
-      return <Badge className="bg-yellow-100 text-yellow-800">{grade}</Badge>
-    } else {
-      return <Badge variant="outline">{grade}</Badge>
-    }
-  }
+  const currentGPA = 3.48
+  const totalCreditsCompleted = previousSemesters.reduce(
+    (total, sem) => total + sem.courses.reduce((sum, course) => sum + course.credits, 0),
+    0,
+  )
+  const currentSemesterCredits = currentSemesterGrades.reduce((sum, course) => sum + course.credits, 0)
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Academic Performance</h1>
-        <p className="text-gray-600 mt-1">Track your grades and academic progress</p>
+        <h1 className="text-3xl font-bold text-gray-900">Grades</h1>
+        <p className="text-gray-600 mt-1">View your academic performance and grades</p>
       </div>
 
+      {/* Academic Summary */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Current GPA</CardTitle>
+            <TrendingUp className="h-4 w-4 text-green-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{currentGPA.toFixed(2)}</div>
+            <p className="text-xs text-muted-foreground">Out of 4.0</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Credits Completed</CardTitle>
             <Award className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{currentSemesterGPA}</div>
+            <div className="text-2xl font-bold">{totalCreditsCompleted}</div>
+            <p className="text-xs text-muted-foreground">Out of 120 required</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Current Credits</CardTitle>
+            <BarChart3 className="h-4 w-4 text-purple-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{currentSemesterCredits}</div>
             <p className="text-xs text-muted-foreground">This semester</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Cumulative GPA</CardTitle>
-            <BookOpen className="h-4 w-4 text-green-600" />
+            <CardTitle className="text-sm font-medium">Academic Status</CardTitle>
+            <Award className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{cumulativeGPA}</div>
-            <p className="text-xs text-muted-foreground">Overall</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Credits</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {currentSemesterGrades.reduce((sum, course) => sum + course.credits, 0) +
-                previousSemesterGrades.reduce((sum, course) => sum + course.credits, 0)}
-            </div>
-            <p className="text-xs text-muted-foreground">Completed</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Course Load</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{currentSemesterGrades.length}</div>
-            <p className="text-xs text-muted-foreground">Current courses</p>
+            <div className="text-lg font-bold text-green-600">Good Standing</div>
+            <p className="text-xs text-muted-foreground">Eligible for graduation</p>
           </CardContent>
         </Card>
       </div>
 
-      <Tabs value={selectedTab} onValueChange={setSelectedTab}>
+      <Tabs defaultValue="current" className="space-y-6">
         <TabsList>
           <TabsTrigger value="current">Current Semester</TabsTrigger>
-          <TabsTrigger value="previous">Previous Semester</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="previous">Previous Semesters</TabsTrigger>
+          <TabsTrigger value="analytics">Grade Analytics</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="current" className="space-y-4">
-          <div className="grid gap-6">
-            {currentSemesterGrades.map((course) => (
-              <Card key={course.id}>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="flex items-center space-x-2">
-                        <Badge variant="outline">{course.code}</Badge>
-                        <span>{course.name}</span>
-                      </CardTitle>
-                      <CardDescription>{course.credits} credits</CardDescription>
+        <TabsContent value="current" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Spring 2025 - Current Grades</CardTitle>
+              <CardDescription>Your grades for the current semester</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {currentSemesterGrades.map((course) => (
+                  <Card key={course.courseCode} className="p-4">
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <h3 className="font-semibold text-lg">{course.courseName}</h3>
+                        <p className="text-gray-600">
+                          {course.courseCode} • {course.credits} credits
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold">{course.currentGrade}%</div>
+                        <Badge variant="outline" className="mt-1">
+                          {course.letterGrade}
+                        </Badge>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      {getTrendIcon(course.trend)}
-                      {getGradeBadge(course.currentGrade)}
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="grid gap-3">
-                      {course.assignments.map((assignment, index) => (
-                        <div key={index} className="flex items-center justify-between">
-                          <span className="text-sm font-medium">{assignment.name}</span>
+
+                    <div className="space-y-3">
+                      {course.assessments.map((assessment, index) => (
+                        <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                          <div className="flex-1">
+                            <span className="font-medium">{assessment.type}</span>
+                            <span className="text-sm text-gray-600 ml-2">({assessment.weight}%)</span>
+                          </div>
                           <div className="flex items-center space-x-2">
-                            <span className="text-sm text-gray-600">{assignment.weight}%</span>
-                            {assignment.score !== null ? (
-                              <Badge variant="outline">
-                                {assignment.score}/{assignment.maxScore}
+                            <span className="text-sm text-gray-600">
+                              {new Date(assessment.date).toLocaleDateString()}
+                            </span>
+                            {assessment.score !== null ? (
+                              <Badge variant="default" className="bg-green-100 text-green-800">
+                                {assessment.score}/{assessment.maxScore}
                               </Badge>
                             ) : (
                               <Badge variant="secondary">Pending</Badge>
@@ -283,107 +242,106 @@ export default function GradesPage() {
                         </div>
                       ))}
                     </div>
-                    <div className="pt-2 border-t">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium">Current Grade</span>
-                        <div className="flex items-center space-x-2">
-                          <span className="text-lg font-bold">{course.currentGrade}</span>
-                          <span className="text-sm text-gray-600">({course.gpa} GPA)</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="previous" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Fall 2024 Semester</CardTitle>
-              <CardDescription>Completed courses and final grades</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {previousSemesterGrades.map((course, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div>
-                      <div className="flex items-center space-x-2">
-                        <Badge variant="outline">{course.code}</Badge>
-                        <span className="font-medium">{course.name}</span>
-                      </div>
-                      <span className="text-sm text-gray-600">{course.credits} credits</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      {getGradeBadge(course.finalGrade)}
-                      <span className="text-sm text-gray-600">({course.gpa} GPA)</span>
-                    </div>
-                  </div>
+                  </Card>
                 ))}
-                <div className="pt-4 border-t">
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">Semester GPA</span>
-                    <span className="text-lg font-bold">{previousSemesterGPA}</span>
-                  </div>
-                </div>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="analytics" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
+        <TabsContent value="previous" className="space-y-6">
+          {previousSemesters.map((semester) => (
+            <Card key={semester.semester}>
               <CardHeader>
-                <CardTitle>GPA Trend</CardTitle>
-                <CardDescription>Your academic performance over time</CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>{semester.semester}</CardTitle>
+                    <CardDescription>
+                      GPA: {semester.gpa.toFixed(2)} • Credits:{" "}
+                      {semester.courses.reduce((sum, course) => sum + course.credits, 0)}
+                    </CardDescription>
+                  </div>
+                  <Button variant="outline" size="sm">
+                    <Download className="h-4 w-4 mr-2" />
+                    Transcript
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span>Previous Semester</span>
-                    <span className="font-bold">{previousSemesterGPA}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span>Current Semester</span>
-                    <span className="font-bold">{currentSemesterGPA}</span>
-                  </div>
-                  <div className="flex justify-between items-center pt-2 border-t">
-                    <span>Cumulative GPA</span>
-                    <span className="text-lg font-bold">{cumulativeGPA}</span>
-                  </div>
+                <div className="space-y-2">
+                  {semester.courses.map((course) => (
+                    <div key={course.code} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3">
+                          <Badge variant="outline">{course.code}</Badge>
+                          <span className="font-medium">{course.name}</span>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-1">{course.credits} credits</p>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <span className="text-sm text-gray-600">{course.points.toFixed(1)} pts</span>
+                        <Badge
+                          variant="outline"
+                          className={
+                            course.grade.startsWith("A")
+                              ? "bg-green-100 text-green-800"
+                              : course.grade.startsWith("B")
+                                ? "bg-blue-100 text-blue-800"
+                                : "bg-yellow-100 text-yellow-800"
+                          }
+                        >
+                          {course.grade}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
                 </div>
+              </CardContent>
+            </Card>
+          ))}
+        </TabsContent>
+
+        <TabsContent value="analytics" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Current Semester Performance</CardTitle>
+                <CardDescription>Grade distribution across courses</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={gradeChartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="course" />
+                    <YAxis domain={[0, 100]} />
+                    <Tooltip />
+                    <Bar dataKey="grade" fill="#3b82f6" />
+                  </BarChart>
+                </ResponsiveContainer>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>Grade Distribution</CardTitle>
-                <CardDescription>Current semester grade breakdown</CardDescription>
+                <CardTitle>GPA Trend</CardTitle>
+                <CardDescription>Your GPA progression over time</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span>A Grades</span>
-                    <span className="font-bold">
-                      {currentSemesterGrades.filter((c) => c.currentGrade.startsWith("A")).length}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span>B Grades</span>
-                    <span className="font-bold">
-                      {currentSemesterGrades.filter((c) => c.currentGrade.startsWith("B")).length}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span>C Grades</span>
-                    <span className="font-bold">
-                      {currentSemesterGrades.filter((c) => c.currentGrade.startsWith("C")).length}
-                    </span>
-                  </div>
-                </div>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={gpaHistory}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="semester" />
+                    <YAxis domain={[0, 4]} />
+                    <Tooltip />
+                    <Line
+                      type="monotone"
+                      dataKey="gpa"
+                      stroke="#3b82f6"
+                      strokeWidth={2}
+                      dot={{ fill: "#3b82f6", strokeWidth: 2, r: 4 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
               </CardContent>
             </Card>
           </div>

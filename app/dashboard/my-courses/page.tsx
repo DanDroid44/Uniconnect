@@ -1,207 +1,229 @@
 "use client"
 
-import { useState } from "react"
-import { Users, Upload, Calendar } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
+import { Button } from "@/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { BookOpen, Users, Upload, Calendar, Clock, MapPin } from "lucide-react"
 
-const mockCourses = [
+const lecturerCourses = [
   {
-    id: "1",
+    id: 1,
     code: "CS101",
-    name: "Introduction to Programming",
+    name: "Introduction to Computer Science",
+    credits: 3,
+    semester: "Spring 2025",
+    schedule: "Mon/Wed 09:30-11:00",
+    room: "Building A, Room 203",
+    enrolledStudents: 45,
+    maxCapacity: 50,
     faculty: "Computer Science",
-    semester: "1st Semester",
-    enrolled: 45,
-    capacity: 50,
-    assessments: {
-      completed: 3,
-      total: 5,
-    },
-    nextClass: "2025-01-10 09:00",
-    room: "Lab A-101",
+    description: "Basic concepts of programming and computer science fundamentals",
+    assessments: [
+      { type: "Test 1", weight: 20, completed: true },
+      { type: "Test 2", weight: 20, completed: true },
+      { type: "Assignment 1", weight: 10, completed: true },
+      { type: "Assignment 2", weight: 10, completed: false },
+      { type: "Final Exam", weight: 40, completed: false },
+    ],
   },
   {
-    id: "2",
+    id: 2,
     code: "CS201",
-    name: "Data Structures",
+    name: "Data Structures and Algorithms",
+    credits: 4,
+    semester: "Spring 2025",
+    schedule: "Tue/Thu 14:00-15:30",
+    room: "Building A, Room 205",
+    enrolledStudents: 38,
+    maxCapacity: 45,
     faculty: "Computer Science",
-    semester: "1st Semester",
-    enrolled: 38,
-    capacity: 40,
-    assessments: {
-      completed: 2,
-      total: 4,
-    },
-    nextClass: "2025-01-10 11:00",
-    room: "Room B-205",
+    description: "Advanced programming concepts including data structures and algorithm design",
+    assessments: [
+      { type: "Test 1", weight: 20, completed: true },
+      { type: "Test 2", weight: 20, completed: false },
+      { type: "Assignment 1", weight: 15, completed: true },
+      { type: "Assignment 2", weight: 15, completed: false },
+      { type: "Final Exam", weight: 30, completed: false },
+    ],
   },
   {
-    id: "3",
+    id: 3,
     code: "CS301",
-    name: "Database Systems",
+    name: "Software Engineering",
+    credits: 3,
+    semester: "Spring 2025",
+    schedule: "Wed/Fri 10:00-11:30",
+    room: "Building A, Room 207",
+    enrolledStudents: 32,
+    maxCapacity: 40,
     faculty: "Computer Science",
-    semester: "1st Semester",
-    enrolled: 32,
-    capacity: 35,
-    assessments: {
-      completed: 4,
-      total: 6,
-    },
-    nextClass: "2025-01-11 14:00",
-    room: "Lab C-102",
+    description: "Software development methodologies and project management",
+    assessments: [
+      { type: "Test 1", weight: 25, completed: true },
+      { type: "Test 2", weight: 25, completed: false },
+      { type: "Project", weight: 30, completed: false },
+      { type: "Final Exam", weight: 20, completed: false },
+    ],
   },
 ]
 
 export default function MyCoursesPage() {
-  const [courses] = useState(mockCourses)
-
-  const totalEnrolled = courses.reduce((sum, course) => sum + course.enrolled, 0)
-  const totalCapacity = courses.reduce((sum, course) => sum + course.capacity, 0)
-  const totalAssessments = courses.reduce((sum, course) => sum + course.assessments.total, 0)
-  const completedAssessments = courses.reduce((sum, course) => sum + course.assessments.completed, 0)
+  const totalStudents = lecturerCourses.reduce((sum, course) => sum + course.enrolledStudents, 0)
+  const totalCredits = lecturerCourses.reduce((sum, course) => sum + course.credits, 0)
+  const averageEnrollment = Math.round(
+    lecturerCourses.reduce((sum, course) => sum + (course.enrolledStudents / course.maxCapacity) * 100, 0) /
+      lecturerCourses.length,
+  )
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">My Courses</h1>
-          <p className="text-gray-600">Manage your teaching assignments</p>
-        </div>
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900">My Courses</h1>
+        <p className="text-gray-600 mt-1">Manage your teaching assignments and course materials</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* Course Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card>
-          <CardHeader className="pb-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Courses</CardTitle>
+            <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{courses.length}</div>
+            <div className="text-2xl font-bold">{lecturerCourses.length}</div>
+            <p className="text-xs text-muted-foreground">Active this semester</p>
           </CardContent>
         </Card>
+
         <Card>
-          <CardHeader className="pb-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Students</CardTitle>
+            <Users className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalEnrolled}</div>
-            <p className="text-xs text-gray-500">of {totalCapacity} capacity</p>
+            <div className="text-2xl font-bold">{totalStudents}</div>
+            <p className="text-xs text-muted-foreground">Across all courses</p>
           </CardContent>
         </Card>
+
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Assessments</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Credit Hours</CardTitle>
+            <Calendar className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {completedAssessments}/{totalAssessments}
-            </div>
-            <p className="text-xs text-gray-500">Completed</p>
+            <div className="text-2xl font-bold">{totalCredits}</div>
+            <p className="text-xs text-muted-foreground">Teaching load</p>
           </CardContent>
         </Card>
+
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Average Enrollment</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Avg Enrollment</CardTitle>
+            <Upload className="h-4 w-4 text-purple-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{Math.round((totalEnrolled / totalCapacity) * 100)}%</div>
+            <div className="text-2xl font-bold">{averageEnrollment}%</div>
+            <p className="text-xs text-muted-foreground">Capacity utilization</p>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {courses.map((course) => (
-          <Card key={course.id}>
+      {/* Course Cards */}
+      <div className="space-y-6">
+        {lecturerCourses.map((course) => (
+          <Card key={course.id} className="hover:shadow-lg transition-shadow">
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex items-start justify-between">
                 <div>
-                  <CardTitle className="text-lg">{course.name}</CardTitle>
-                  <CardDescription>
-                    {course.code} • {course.semester}
+                  <CardTitle className="flex items-center space-x-2">
+                    <Badge variant="outline">{course.code}</Badge>
+                    <span className="text-lg">{course.name}</span>
+                  </CardTitle>
+                  <CardDescription className="mt-2">
+                    {course.credits} credit{course.credits !== 1 ? "s" : ""} • {course.semester} • {course.faculty}
                   </CardDescription>
                 </div>
-                <Badge variant="outline">{course.faculty}</Badge>
+                <Badge variant="default" className="bg-blue-100 text-blue-800">
+                  {course.enrolledStudents}/{course.maxCapacity} students
+                </Badge>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Enrollment</span>
-                  <span>
-                    {course.enrolled}/{course.capacity}
-                  </span>
-                </div>
-                <Progress value={(course.enrolled / course.capacity) * 100} className="h-2" />
-              </div>
+              <p className="text-gray-700">{course.description}</p>
 
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Assessments</span>
-                  <span>
-                    {course.assessments.completed}/{course.assessments.total}
-                  </span>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="flex items-center space-x-2 text-gray-600">
+                  <Clock className="h-4 w-4" />
+                  <span>{course.schedule}</span>
                 </div>
-                <Progress value={(course.assessments.completed / course.assessments.total) * 100} className="h-2" />
-              </div>
-
-              <div className="flex items-center justify-between text-sm text-gray-600">
-                <div className="flex items-center">
-                  <Calendar className="mr-1 h-4 w-4" />
-                  Next: {new Date(course.nextClass).toLocaleDateString()} at{" "}
-                  {new Date(course.nextClass).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                <div className="flex items-center space-x-2 text-gray-600">
+                  <MapPin className="h-4 w-4" />
+                  <span>{course.room}</span>
                 </div>
               </div>
 
-              <div className="text-sm text-gray-600">Room: {course.room}</div>
+              <Tabs defaultValue="assessments" className="w-full">
+                <TabsList>
+                  <TabsTrigger value="assessments">Assessments</TabsTrigger>
+                  <TabsTrigger value="students">Students</TabsTrigger>
+                </TabsList>
 
-              <div className="flex gap-2 pt-2">
-                <Button size="sm" variant="outline" className="flex-1 bg-transparent">
-                  <Users className="mr-2 h-4 w-4" />
-                  View Students
-                </Button>
-                <Button size="sm" variant="outline" className="flex-1 bg-transparent">
-                  <Upload className="mr-2 h-4 w-4" />
-                  Upload Marks
-                </Button>
+                <TabsContent value="assessments" className="space-y-3">
+                  <div className="grid gap-2">
+                    {course.assessments.map((assessment, index) => (
+                      <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-medium">{assessment.type}</span>
+                          <span className="text-sm text-gray-600">({assessment.weight}%)</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          {assessment.completed ? (
+                            <Badge className="bg-green-100 text-green-800">Completed</Badge>
+                          ) : (
+                            <Badge variant="secondary">Pending</Badge>
+                          )}
+                          {!assessment.completed && (
+                            <Button size="sm" variant="outline">
+                              <Upload className="h-3 w-3 mr-1" />
+                              Upload Marks
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="students">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">{course.enrolledStudents} students enrolled</span>
+                    <Button size="sm" variant="outline">
+                      <Users className="h-3 w-3 mr-1" />
+                      View All Students
+                    </Button>
+                  </div>
+                </TabsContent>
+              </Tabs>
+
+              <div className="flex items-center justify-between pt-2 border-t">
+                <div className="flex space-x-2">
+                  <Button size="sm" variant="outline">
+                    <Users className="h-4 w-4 mr-1" />
+                    View Enrollment
+                  </Button>
+                  <Button size="sm" variant="outline">
+                    <Upload className="h-4 w-4 mr-1" />
+                    Upload Marks
+                  </Button>
+                </div>
+                <Button size="sm">Course Details</Button>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
-          <CardDescription>Latest updates from your courses</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center space-x-4">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <div className="flex-1">
-                <p className="text-sm font-medium">Assignment grades uploaded for CS101</p>
-                <p className="text-xs text-gray-500">2 hours ago</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <div className="flex-1">
-                <p className="text-sm font-medium">New student enrolled in CS201</p>
-                <p className="text-xs text-gray-500">1 day ago</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-              <div className="flex-1">
-                <p className="text-sm font-medium">Midterm exam scheduled for CS301</p>
-                <p className="text-xs text-gray-500">3 days ago</p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   )
 }
