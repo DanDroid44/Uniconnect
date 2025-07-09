@@ -1,8 +1,8 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { PasswordInput } from "@/components/ui/password-input"
+import { LanguageSwitcher } from "@/components/language-switcher"
 import { validateEmail, validatePassword } from "@/lib/validation"
 import { useLanguage } from "@/hooks/use-language"
 
@@ -56,11 +57,12 @@ export function LoginForm() {
 
       const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Login timeout")), 10000))
 
-      const { data, error: authError } = (await Promise.race([loginPromise, timeoutPromise])) as any
+      const result = await Promise.race([loginPromise, timeoutPromise])
+      const { data, error: authError } = result as any
 
       if (authError) {
         if (authError.message.includes("Invalid login credentials")) {
-          setError(t("auth.invalidCredentials"))
+          setError("Invalid email or password")
         } else {
           setError(authError.message)
         }
@@ -85,9 +87,15 @@ export function LoginForm() {
 
   return (
     <Card className="w-full max-w-md mx-auto">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center">{t("auth.signIn")}</CardTitle>
-        <CardDescription className="text-center">{t("auth.signInDescription")}</CardDescription>
+      <CardHeader className="text-center">
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex-1" />
+          <CardTitle className="text-2xl">{t("signInTitle")}</CardTitle>
+          <div className="flex-1 flex justify-end">
+            <LanguageSwitcher />
+          </div>
+        </div>
+        <CardDescription>{t("signInDescription")}</CardDescription>
       </CardHeader>
       <CardContent>
         {networkError && (
@@ -104,11 +112,11 @@ export function LoginForm() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">{t("auth.email")}</Label>
+            <Label htmlFor="email">{t("email")}</Label>
             <Input
               id="email"
               type="email"
-              placeholder={t("auth.emailPlaceholder")}
+              placeholder="your@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -116,12 +124,19 @@ export function LoginForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">{t("auth.password")}</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="password">{t("password")}</Label>
+              <Link href="/auth/forgot-password" className="text-sm text-blue-600 hover:underline">
+                {t("forgotPassword")}
+              </Link>
+            </div>
             <PasswordInput
               id="password"
-              placeholder={t("auth.passwordPlaceholder")}
+              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              showPasswordLabel={t("showPassword")}
+              hidePasswordLabel={t("hidePassword")}
               required
               disabled={isLoading}
             />
@@ -131,19 +146,17 @@ export function LoginForm() {
               <AlertDescription className="text-red-800">{error}</AlertDescription>
             </Alert>
           )}
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? t("common.loading") : t("auth.signIn")}
+          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
+            {isLoading ? t("signingIn") : t("signIn")}
           </Button>
         </form>
-        <div className="mt-4 text-center text-sm">
-          <span className="text-gray-600">{t("auth.noAccount")} </span>
-          <button
-            onClick={() => router.push("/auth/register")}
-            className="text-blue-600 hover:underline font-medium"
-            disabled={isLoading}
-          >
-            {t("auth.signUp")}
-          </button>
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-600">
+            {t("dontHaveAccount")}{" "}
+            <Link href="/auth/register" className="text-blue-600 hover:underline">
+              {t("createAccount")}
+            </Link>
+          </p>
         </div>
       </CardContent>
     </Card>

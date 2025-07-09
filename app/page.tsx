@@ -36,10 +36,11 @@ export default function Home() {
           setTimeout(() => reject(new Error("Auth check timeout")), 5000),
         )
 
+        const result = await Promise.race([authPromise, timeoutPromise])
         const {
           data: { user },
           error,
-        } = (await Promise.race([authPromise, timeoutPromise])) as any
+        } = result as any
 
         if (user) {
           router.push("/dashboard")
