@@ -1,134 +1,83 @@
--- Row Level Security (RLS) Policies for UniConnect
--- This script sets up security policies to ensure users can only access their own data
-
--- Enable RLS on all tables
+-- Enable Row Level Security on all tables
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.courses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.enrollments ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.grades ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.attendance ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.student_groups ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.group_memberships ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.assessments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.financial_records ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.announcements ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.class_schedules ENABLE ROW LEVEL SECURITY;
 
--- Profiles policies
-CREATE POLICY "Users can view their own profile" ON public.profiles
-  FOR SELECT USING (auth.uid() = id);
+-- RLS Policies for profiles
+CREATE POLICY "Users can view own profile" ON public.profiles
+    FOR SELECT USING (auth.uid() = id);
 
-CREATE POLICY "Users can update their own profile" ON public.profiles
-  FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "Users can update own profile" ON public.profiles
+    FOR UPDATE USING (auth.uid() = id);
 
-CREATE POLICY "Lecturers can view student profiles in their courses" ON public.profiles
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM public.course_assignments ca
-      JOIN public.enrollments e ON ca.course_id = e.course_id
-      WHERE ca.lecturer_id = auth.uid() AND e.student_id = profiles.id
-    )
-  );
+CREATE POLICY "Users can insert own profile" ON public.profiles
+    FOR INSERT WITH CHECK (auth.uid() = id);
 
-CREATE POLICY "Coordinators can view profiles in their department" ON public.profiles
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM public.profiles p
-      WHERE p.id = auth.uid() 
-      AND p.role = 'coordinator' 
-      AND p.department_id = profiles.department_id
-    )
-  );
+-- RLS Policies for courses
+CREATE POLICY "Anyone can view courses" ON public.courses
+    FOR SELECT USING (true);
 
-CREATE POLICY "Admins can view all profiles" ON public.profiles
-  FOR ALL USING (
-    EXISTS (
-      SELECT 1 FROM public.profiles p
-      WHERE p.id = auth.uid() AND p.role = 'admin'
-    )
-  );
+-- RLS Policies for enrollments
+CREATE POLICY "Students can view own enrollments" ON public.enrollments
+    FOR SELECT USING (
+        auth.uid() = student_id OR 
+        EXISTS (
+            SELECT 1 FROM public.profiles 
+            WHERE id = auth.uid() AND role IN ('lecturer', 'coordinator')
+        )
+    );
 
--- Enrollments policies
-CREATE POLICY "Students can view their own enrollments" ON public.enrollments
-  FOR SELECT USING (auth.uid() = student_id);
+CREATE POLICY "Students can insert own enrollments" ON public.enrollments
+    FOR INSERT WITH CHECK (auth.uid() = student_id);
 
-CREATE POLICY "Lecturers can view enrollments for their courses" ON public.enrollments
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM public.course_assignments ca
-      WHERE ca.lecturer_id = auth.uid() AND ca.course_id = enrollments.course_id
-    )
-  );
+-- RLS Policies for assessments
+CREATE POLICY "Students can view own assessments" ON public.assessments
+    FOR SELECT USING (
+        auth.uid() = student_id OR
+        EXISTS (
+            SELECT 1 FROM public.courses c
+            JOIN public.profiles p ON p.id = auth.uid()
+            WHERE c.id = course_id AND (c.lecturer_id = auth.uid() OR c.coordinator_id = auth.uid())
+        )
+    );
 
-CREATE POLICY "Lecturers can update enrollments for their courses" ON public.enrollments
-  FOR UPDATE USING (
-    EXISTS (
-      SELECT 1 FROM public.course_assignments ca
-      WHERE ca.lecturer_id = auth.uid() AND ca.course_id = enrollments.course_id
-    )
-  );
+-- RLS Policies for financial records
+CREATE POLICY "Students can view own financial records" ON public.financial_records
+    FOR SELECT USING (
+        auth.uid() = student_id OR
+        EXISTS (
+            SELECT 1 FROM public.profiles 
+            WHERE id = auth.uid() AND role = 'coordinator'
+        )
+    );
 
--- Grades policies
-CREATE POLICY "Students can view their own grades" ON public.grades
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM public.enrollments e
-      WHERE e.id = grades.enrollment_id AND e.student_id = auth.uid()
-    )
-  );
+-- RLS Policies for announcements
+CREATE POLICY "Users can view relevant announcements" ON public.announcements
+    FOR SELECT USING (
+        target_role IS NULL OR
+        EXISTS (
+            SELECT 1 FROM public.profiles 
+            WHERE id = auth.uid() AND role = target_role
+        ) OR
+        EXISTS (
+            SELECT 1 FROM public.profiles 
+            WHERE id = auth.uid() AND faculty = target_faculty
+        )
+    );
 
-CREATE POLICY "Lecturers can manage grades for their courses" ON public.grades
-  FOR ALL USING (
-    EXISTS (
-      SELECT 1 FROM public.enrollments e
-      JOIN public.course_assignments ca ON ca.course_id = e.course_id
-      WHERE e.id = grades.enrollment_id AND ca.lecturer_id = auth.uid()
-    )
-  );
-
--- Notifications policies
-CREATE POLICY "Users can view their own notifications" ON public.notifications
-  FOR SELECT USING (auth.uid() = recipient_id);
-
-CREATE POLICY "Users can update their own notifications" ON public.notifications
-  FOR UPDATE USING (auth.uid() = recipient_id);
-
-CREATE POLICY "Lecturers and coordinators can send notifications" ON public.notifications
-  FOR INSERT WITH CHECK (
-    auth.uid() = sender_id AND
-    EXISTS (
-      SELECT 1 FROM public.profiles p
-      WHERE p.id = auth.uid() AND p.role IN ('lecturer', 'coordinator', 'admin')
-    )
-  );
-
--- Public read access for reference tables
-CREATE POLICY "Public read access for faculties" ON public.faculties FOR SELECT USING (true);
-CREATE POLICY "Public read access for departments" ON public.departments FOR SELECT USING (true);
-CREATE POLICY "Public read access for courses" ON public.courses FOR SELECT USING (true);
-CREATE POLICY "Public read access for academic years" ON public.academic_years FOR SELECT USING (true);
-CREATE POLICY "Public read access for semesters" ON public.semesters FOR SELECT USING (true);
-
--- Student groups policies
-CREATE POLICY "Students can view groups for their courses" ON public.student_groups
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM public.enrollments e
-      WHERE e.student_id = auth.uid() AND e.course_id = student_groups.course_id
-    )
-  );
-
-CREATE POLICY "Students can create groups for their courses" ON public.student_groups
-  FOR INSERT WITH CHECK (
-    auth.uid() = created_by AND
-    EXISTS (
-      SELECT 1 FROM public.enrollments e
-      WHERE e.student_id = auth.uid() AND e.course_id = course_id
-    )
-  );
-
--- Group memberships policies
-CREATE POLICY "Students can view their group memberships" ON public.group_memberships
-  FOR SELECT USING (auth.uid() = student_id);
-
-CREATE POLICY "Students can join groups" ON public.group_memberships
-  FOR INSERT WITH CHECK (auth.uid() = student_id);
-
-CREATE POLICY "Students can leave groups" ON public.group_memberships
-  FOR DELETE USING (auth.uid() = student_id);
+-- RLS Policies for class schedules
+CREATE POLICY "Users can view class schedules" ON public.class_schedules
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM public.enrollments e
+            WHERE e.course_id = class_schedules.course_id AND e.student_id = auth.uid()
+        ) OR
+        EXISTS (
+            SELECT 1 FROM public.courses c
+            WHERE c.id = class_schedules.course_id AND (c.lecturer_id = auth.uid() OR c.coordinator_id = auth.uid())
+        )
+    );

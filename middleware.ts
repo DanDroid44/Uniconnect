@@ -2,68 +2,72 @@ import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 
 export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
+  // Check if environment variables are available
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return NextResponse.next()
+  }
+
+  let supabaseResponse = NextResponse.next({
+    request,
   })
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
+  try {
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
       cookies: {
         getAll() {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
-          response = NextResponse.next({
+          supabaseResponse = NextResponse.next({
             request,
           })
-          cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options))
+          cookiesToSet.forEach(({ name, value, options }) => supabaseResponse.cookies.set(name, value, options))
         },
       },
-    },
-  )
+    })
 
-  // This will refresh session if expired - required for Server Components
-  await supabase.auth.getUser()
-
-  // Protect dashboard routes
-  if (request.nextUrl.pathname.startsWith("/dashboard")) {
     const {
       data: { user },
+      error,
     } = await supabase.auth.getUser()
 
-    if (!user) {
-      return NextResponse.redirect(new URL("/auth/login", request.url))
+    // "Auth session missing!" is normal when no user is logged in
+    // Don't treat it as an error
+    if (error && error.message !== "Auth session missing!") {
+      console.error("Middleware auth error:", error)
+      return supabaseResponse
     }
+
+    // Redirect unauthenticated users to login (except for auth pages and home)
+    if (
+      !user &&
+      !request.nextUrl.pathname.startsWith("/auth") &&
+      request.nextUrl.pathname !== "/" &&
+      request.nextUrl.pathname !== "/debug"
+    ) {
+      const url = request.nextUrl.clone()
+      url.pathname = "/auth/login"
+      return NextResponse.redirect(url)
+    }
+
+    // Redirect authenticated users away from auth pages and home to dashboard
+    if (user && (request.nextUrl.pathname.startsWith("/auth") || request.nextUrl.pathname === "/")) {
+      const url = request.nextUrl.clone()
+      url.pathname = "/dashboard"
+      return NextResponse.redirect(url)
+    }
+  } catch (error) {
+    console.error("Middleware error:", error)
+    // Continue without redirecting on error
   }
 
-  // Redirect authenticated users away from auth pages
-  if (request.nextUrl.pathname.startsWith("/auth/")) {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (user) {
-      return NextResponse.redirect(new URL("/dashboard", request.url))
-    }
-  }
-
-  return response
+  return supabaseResponse
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
-     */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
-  ],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
 }

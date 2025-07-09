@@ -1,42 +1,57 @@
--- Seed data for UniConnect platform
--- This script populates the database with sample data for testing
-
--- Insert sample faculties
-INSERT INTO public.faculties (id, name, code, description, created_at) VALUES
-  ('f1', 'Ciências da Computação', 'CC', 'Faculdade de Ciências da Computação', NOW()),
-  ('f2', 'Gestão de Negócios', 'GN', 'Faculdade de Gestão de Negócios', NOW()),
-  ('f3', 'Contabilidade', 'CONT', 'Faculdade de Contabilidade', NOW())
-ON CONFLICT (id) DO NOTHING;
-
--- Insert sample departments
-INSERT INTO public.departments (id, name, code, faculty_id, created_at) VALUES
-  ('d1', 'Programação', 'PROG', 'f1', NOW()),
-  ('d2', 'Sistemas de Informação', 'SI', 'f1', NOW()),
-  ('d3', 'Marketing', 'MKT', 'f2', NOW()),
-  ('d4', 'Finanças', 'FIN', 'f2', NOW()),
-  ('d5', 'Auditoria', 'AUD', 'f3', NOW())
-ON CONFLICT (id) DO NOTHING;
+-- Insert sample profiles
+INSERT INTO public.profiles (id, full_name, role, faculty, student_id, phone, address) VALUES
+    ('550e8400-e29b-41d4-a716-446655440000', 'Daniel Darsamo', 'student', 'computer-science', 'CS2024001', '+258 84 123 4567', 'Maputo, Mozambique'),
+    ('550e8400-e29b-41d4-a716-446655440001', 'Prof. Maria Santos', 'lecturer', 'computer-science', NULL, '+258 84 234 5678', 'Maputo, Mozambique'),
+    ('550e8400-e29b-41d4-a716-446655440002', 'Dr. João Silva', 'coordinator', 'computer-science', NULL, '+258 84 345 6789', 'Maputo, Mozambique');
 
 -- Insert sample courses
-INSERT INTO public.courses (id, name, code, credits, department_id, semester, created_at) VALUES
-  ('c1', 'Programação I', 'PROG101', 6, 'd1', 1, NOW()),
-  ('c2', 'Cálculo II', 'CALC201', 6, 'd1', 2, NOW()),
-  ('c3', 'Base de Dados', 'BD301', 8, 'd2', 3, NOW()),
-  ('c4', 'Marketing Digital', 'MKT201', 6, 'd3', 2, NOW()),
-  ('c5', 'Contabilidade Geral', 'CONT101', 6, 'd5', 1, NOW())
-ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.courses (id, code, name, description, credits, faculty, semester, year, coordinator_id, lecturer_id) VALUES
+    ('650e8400-e29b-41d4-a716-446655440000', 'CS101', 'Introduction to Computer Science', 'Basic concepts of programming and computer science', 3, 'computer-science', 1, 2025, '550e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440001'),
+    ('650e8400-e29b-41d4-a716-446655440001', 'MATH201', 'Calculus II', 'Advanced calculus concepts', 4, 'computer-science', 1, 2025, '550e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440001'),
+    ('650e8400-e29b-41d4-a716-446655440002', 'ENG202', 'Technical Writing', 'Writing skills for technical documentation', 2, 'computer-science', 1, 2025, '550e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440001'),
+    ('650e8400-e29b-41d4-a716-446655440003', 'PSYC101', 'Introduction to Psychology', 'Basic psychological concepts', 3, 'computer-science', 1, 2025, '550e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440001'),
+    ('650e8400-e29b-41d4-a716-446655440004', 'HIST105', 'World History', 'Overview of world historical events', 3, 'computer-science', 1, 2025, '550e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440001');
 
--- Insert sample academic years
-INSERT INTO public.academic_years (id, year, start_date, end_date, is_active, created_at) VALUES
-  ('ay2024', '2024', '2024-02-01', '2024-11-30', true, NOW()),
-  ('ay2023', '2023', '2023-02-01', '2023-11-30', false, NOW())
-ON CONFLICT (id) DO NOTHING;
+-- Insert student enrollments
+INSERT INTO public.enrollments (student_id, course_id) VALUES
+    ('550e8400-e29b-41d4-a716-446655440000', '650e8400-e29b-41d4-a716-446655440000'),
+    ('550e8400-e29b-41d4-a716-446655440000', '650e8400-e29b-41d4-a716-446655440001'),
+    ('550e8400-e29b-41d4-a716-446655440000', '650e8400-e29b-41d4-a716-446655440002'),
+    ('550e8400-e29b-41d4-a716-446655440000', '650e8400-e29b-41d4-a716-446655440003'),
+    ('550e8400-e29b-41d4-a716-446655440000', '650e8400-e29b-41d4-a716-446655440004');
 
--- Insert sample semesters
-INSERT INTO public.semesters (id, name, academic_year_id, start_date, end_date, is_active, created_at) VALUES
-  ('s1-2024', '1º Semestre', 'ay2024', '2024-02-01', '2024-06-30', false, NOW()),
-  ('s2-2024', '2º Semestre', 'ay2024', '2024-08-01', '2024-11-30', true, NOW())
-ON CONFLICT (id) DO NOTHING;
+-- Insert sample assessments with proper weights
+INSERT INTO public.assessments (course_id, student_id, type, score, max_score, weight) VALUES
+    -- CS101 assessments
+    ('650e8400-e29b-41d4-a716-446655440000', '550e8400-e29b-41d4-a716-446655440000', 'test1', 85, 100, 0.20),
+    ('650e8400-e29b-41d4-a716-446655440000', '550e8400-e29b-41d4-a716-446655440000', 'test2', 90, 100, 0.20),
+    ('650e8400-e29b-41d4-a716-446655440000', '550e8400-e29b-41d4-a716-446655440000', 'assignment1', 95, 100, 0.10),
+    ('650e8400-e29b-41d4-a716-446655440000', '550e8400-e29b-41d4-a716-446655440000', 'assignment2', 88, 100, 0.10),
+    ('650e8400-e29b-41d4-a716-446655440000', '550e8400-e29b-41d4-a716-446655440000', 'exam', 92, 100, 0.40),
+    
+    -- MATH201 assessments
+    ('650e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440000', 'test1', 78, 100, 0.20),
+    ('650e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440000', 'test2', 82, 100, 0.20),
+    ('650e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440000', 'assignment1', 85, 100, 0.10),
+    ('650e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440000', 'assignment2', 90, 100, 0.10),
+    ('650e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440000', 'exam', 88, 100, 0.40);
 
--- Note: User profiles will be created automatically via triggers when users register
--- Sample enrollments and grades would be added after users are created
+-- Insert financial records (Mozambican Metical - MT)
+INSERT INTO public.financial_records (student_id, amount, type, description, due_date, status, academic_year, semester) VALUES
+    ('550e8400-e29b-41d4-a716-446655440000', 5670.00, 'tuition', 'Monthly tuition fee', '2025-02-01', 'pending', 2025, 1),
+    ('550e8400-e29b-41d4-a716-446655440000', 945.00, 'subject_fee', 'CS101 subject fee', '2025-02-01', 'paid', 2025, 1),
+    ('550e8400-e29b-41d4-a716-446655440000', 945.00, 'subject_fee', 'MATH201 subject fee', '2025-02-01', 'paid', 2025, 1),
+    ('550e8400-e29b-41d4-a716-446655440000', 945.00, 'subject_fee', 'ENG202 subject fee', '2025-02-01', 'pending', 2025, 1);
+
+-- Insert class schedules
+INSERT INTO public.class_schedules (course_id, day_of_week, start_time, end_time, room, building) VALUES
+    ('650e8400-e29b-41d4-a716-446655440000', 1, '09:30', '11:00', '203', 'Building A'),
+    ('650e8400-e29b-41d4-a716-446655440001', 1, '12:30', '14:00', '105', 'Building B'),
+    ('650e8400-e29b-41d4-a716-446655440000', 3, '09:30', '11:00', '203', 'Building A'),
+    ('650e8400-e29b-41d4-a716-446655440001', 3, '12:30', '14:00', '105', 'Building B');
+
+-- Insert sample announcements
+INSERT INTO public.announcements (title, content, priority, author_id, target_role, target_faculty) VALUES
+    ('Important update on final exam schedule', 'Please note that the final exam schedule has been updated. Check your student portal for the latest information.', 'high', '550e8400-e29b-41d4-a716-446655440002', 'student', 'computer-science'),
+    ('Library hours extended for exam week', 'The library will be open 24/7 during exam week to support student studies.', 'medium', '550e8400-e29b-41d4-a716-446655440002', 'student', NULL),
+    ('New course registration opens next week', 'Course registration for the next semester will open on Monday. Prepare your course selections.', 'medium', '550e8400-e29b-41d4-a716-446655440002', 'student', NULL);

@@ -1,202 +1,236 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
 import { createClient } from "@/lib/supabase/client"
-import { registerSchema, type RegisterFormData } from "@/lib/validation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { PasswordInput } from "@/components/ui/password-input"
+import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Loader2, UserPlus } from "lucide-react"
-
-const faculties = [
-  { value: "cc", label: "Ciências da Computação" },
-  { value: "gn", label: "Gestão de Negócios" },
-  { value: "cont", label: "Contabilidade" },
-]
-
-const roles = [
-  { value: "student", label: "Estudante" },
-  { value: "lecturer", label: "Professor" },
-  { value: "coordinator", label: "Coordenador" },
-]
+import { PasswordInput } from "@/components/ui/password-input"
+import { validateEmail, validatePassword, validateName } from "@/lib/validation"
+import { useLanguage } from "@/hooks/use-language"
 
 export function RegisterForm() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
-
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    formState: { errors },
-  } = useForm<RegisterFormData>({
-    resolver: zodResolver(registerSchema),
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   })
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [networkError, setNetworkError] = useState(false)
+  const [success, setSuccess] = useState("")
+  const router = useRouter()
+  const { t } = useLanguage()
 
-  const onSubmit = async (data: RegisterFormData) => {
+  const handleInputChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError("")
+    setSuccess("")
+    setNetworkError(false)
     setIsLoading(true)
-    setError(null)
+
+    // Validate inputs
+    const firstNameValidation = validateName(formData.firstName)
+    const lastNameValidation = validateName(formData.lastName)
+    const emailValidation = validateEmail(formData.email)
+    const passwordValidation = validatePassword(formData.password)
+
+    if (!firstNameValidation.isValid) {
+      setError(firstNameValidation.error || "Invalid first name")
+      setIsLoading(false)
+      return
+    }
+
+    if (!lastNameValidation.isValid) {
+      setError(lastNameValidation.error || "Invalid last name")
+      setIsLoading(false)
+      return
+    }
+
+    if (!emailValidation.isValid) {
+      setError(emailValidation.error || "Invalid email")
+      setIsLoading(false)
+      return
+    }
+
+    if (!passwordValidation.isValid) {
+      setError(passwordValidation.error || "Invalid password")
+      setIsLoading(false)
+      return
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setError(t("auth.passwordMismatch"))
+      setIsLoading(false)
+      return
+    }
 
     try {
       const supabase = createClient()
 
-      const { error: signUpError } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
+      // Add timeout for registration attempt
+      const signUpPromise = supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
         options: {
           data: {
-            full_name: data.fullName,
-            role: data.role,
-            faculty: data.faculty,
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            full_name: `${formData.firstName} ${formData.lastName}`,
           },
         },
       })
 
-      if (signUpError) {
-        setError(signUpError.message)
-      } else {
-        router.push("/dashboard")
-        router.refresh()
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Registration timeout")), 15000),
+      )
+
+      const { data, error: authError } = (await Promise.race([signUpPromise, timeoutPromise])) as any
+
+      if (authError) {
+        if (authError.message.includes("User already registered")) {
+          setError(t("auth.userExists"))
+        } else {
+          setError(authError.message)
+        }
+        return
       }
-    } catch (err) {
-      setError("Ocorreu um erro inesperado. Tente novamente.")
+
+      if (data.user) {
+        if (data.user.email_confirmed_at) {
+          setSuccess(t("auth.registrationSuccess"))
+          setTimeout(() => router.push("/dashboard"), 2000)
+        } else {
+          setSuccess(t("auth.checkEmail"))
+          setTimeout(() => router.push("/auth/login"), 3000)
+        }
+      }
+    } catch (error: any) {
+      console.error("Registration error:", error)
+      if (error.message === "Registration timeout" || error.message.includes("fetch")) {
+        setNetworkError(true)
+        setError("Network connection issue. Please check your connection and try again.")
+      } else {
+        setError("An unexpected error occurred. Please try again.")
+      }
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="w-full max-w-md mx-auto">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center">Criar Conta</CardTitle>
-        <CardDescription className="text-center">Preencha os dados para criar sua conta no UniConnect</CardDescription>
+        <CardTitle className="text-2xl font-bold text-center">{t("auth.signUp")}</CardTitle>
+        <CardDescription className="text-center">{t("auth.signUpDescription")}</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+        {networkError && (
+          <Alert className="mb-4 border-yellow-200 bg-yellow-50">
+            <AlertDescription className="text-yellow-800">
+              Network connection issue detected. This might be due to preview environment limitations.
+              <br />
+              <button onClick={() => setNetworkError(false)} className="underline hover:no-underline mt-1">
+                Dismiss
+              </button>
+            </AlertDescription>
+          </Alert>
+        )}
 
-          <div className="space-y-2">
-            <label htmlFor="fullName" className="text-sm font-medium">
-              Nome Completo
-            </label>
-            <Input id="fullName" placeholder="Seu nome completo" {...register("fullName")} disabled={isLoading} />
-            {errors.fullName && <p className="text-sm text-red-600">{errors.fullName.message}</p>}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="firstName">{t("auth.firstName")}</Label>
+              <Input
+                id="firstName"
+                placeholder={t("auth.firstNamePlaceholder")}
+                value={formData.firstName}
+                onChange={(e) => handleInputChange("firstName", e.target.value)}
+                required
+                disabled={isLoading}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lastName">{t("auth.lastName")}</Label>
+              <Input
+                id="lastName"
+                placeholder={t("auth.lastNamePlaceholder")}
+                value={formData.lastName}
+                onChange={(e) => handleInputChange("lastName", e.target.value)}
+                required
+                disabled={isLoading}
+              />
+            </div>
           </div>
-
           <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium">
-              Email
-            </label>
+            <Label htmlFor="email">{t("auth.email")}</Label>
             <Input
               id="email"
               type="email"
-              placeholder="seu.email@ust.ac.mz"
-              {...register("email")}
+              placeholder={t("auth.emailPlaceholder")}
+              value={formData.email}
+              onChange={(e) => handleInputChange("email", e.target.value)}
+              required
               disabled={isLoading}
             />
-            {errors.email && <p className="text-sm text-red-600">{errors.email.message}</p>}
           </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Função</label>
-              <Select onValueChange={(value) => setValue("role", value as any)} disabled={isLoading}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent>
-                  {roles.map((role) => (
-                    <SelectItem key={role.value} value={role.value}>
-                      {role.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.role && <p className="text-sm text-red-600">{errors.role.message}</p>}
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Faculdade</label>
-              <Select onValueChange={(value) => setValue("faculty", value)} disabled={isLoading}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent>
-                  {faculties.map((faculty) => (
-                    <SelectItem key={faculty.value} value={faculty.value}>
-                      {faculty.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.faculty && <p className="text-sm text-red-600">{errors.faculty.message}</p>}
-            </div>
-          </div>
-
           <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium">
-              Senha
-            </label>
+            <Label htmlFor="password">{t("auth.password")}</Label>
             <PasswordInput
               id="password"
-              placeholder="Crie uma senha segura"
-              {...register("password")}
+              placeholder={t("auth.passwordPlaceholder")}
+              value={formData.password}
+              onChange={(e) => handleInputChange("password", e.target.value)}
+              required
               disabled={isLoading}
             />
-            {errors.password && <p className="text-sm text-red-600">{errors.password.message}</p>}
           </div>
-
           <div className="space-y-2">
-            <label htmlFor="confirmPassword" className="text-sm font-medium">
-              Confirmar Senha
-            </label>
+            <Label htmlFor="confirmPassword">{t("auth.confirmPassword")}</Label>
             <PasswordInput
               id="confirmPassword"
-              placeholder="Confirme sua senha"
-              {...register("confirmPassword")}
+              placeholder={t("auth.confirmPasswordPlaceholder")}
+              value={formData.confirmPassword}
+              onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+              required
               disabled={isLoading}
             />
-            {errors.confirmPassword && <p className="text-sm text-red-600">{errors.confirmPassword.message}</p>}
           </div>
-
-          <div className="flex items-center space-x-2">
-            <Checkbox id="terms" {...register("terms")} disabled={isLoading} />
-            <label htmlFor="terms" className="text-sm">
-              Aceito os{" "}
-              <a href="#" className="text-blue-600 hover:underline">
-                termos e condições
-              </a>
-            </label>
-          </div>
-          {errors.terms && <p className="text-sm text-red-600">{errors.terms.message}</p>}
-
+          {error && (
+            <Alert className="border-red-200 bg-red-50">
+              <AlertDescription className="text-red-800">{error}</AlertDescription>
+            </Alert>
+          )}
+          {success && (
+            <Alert className="border-green-200 bg-green-50">
+              <AlertDescription className="text-green-800">{success}</AlertDescription>
+            </Alert>
+          )}
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Criando conta...
-              </>
-            ) : (
-              <>
-                <UserPlus className="mr-2 h-4 w-4" />
-                Criar Conta
-              </>
-            )}
+            {isLoading ? t("common.loading") : t("auth.signUp")}
           </Button>
         </form>
+        <div className="mt-4 text-center text-sm">
+          <span className="text-gray-600">{t("auth.hasAccount")} </span>
+          <button
+            onClick={() => router.push("/auth/login")}
+            className="text-blue-600 hover:underline font-medium"
+            disabled={isLoading}
+          >
+            {t("auth.signIn")}
+          </button>
+        </div>
       </CardContent>
     </Card>
   )
