@@ -24,7 +24,7 @@ export const translations = {
     // University
     universityName: "Saint Thomas University of Mozambique",
     universityDescription:
-      "Supporting three faculties: Computer Science, Business Management, and Accounting. Built specifically for the Mozambican academic system with local payment integration.",
+      "Supporting three faculties: Computer Science, Business Management, and Accounting. Built specifically for the Mozambican academic system.",
 
     // Auth Forms
     fullName: "Full Name",
@@ -34,8 +34,8 @@ export const translations = {
     role: "Role",
     faculty: "Faculty",
     student: "Student",
-    lecturer: "Faculty",
-    coordinator: "Administrative Staff",
+    lecturer: "Lecturer",
+    coordinator: "Coordinator",
     computerScience: "Computer Science",
     businessManagement: "Business Management",
     accounting: "Accounting",
@@ -73,18 +73,87 @@ export const translations = {
     success: "Success",
     unexpectedError: "An unexpected error occurred",
 
-    // Dashboard
+    // Dashboard Common
     welcomeBack: "Welcome back",
-    academicActivities: "Here's what's happening with your academic activities today.",
-    upcomingClasses: "Upcoming Classes",
-    assignmentsDue: "Assignments Due",
-    newAnnouncements: "New Announcements",
-    balanceDue: "Balance Due",
-    nextClass: "Next class in",
-    nextDue: "Next due in",
-    highPriority: "high priority",
-    dueIn: "Due in",
-    days: "days",
+    loading: "Loading...",
+    dashboard: "Dashboard",
+    overview: "Overview",
+    settings: "Settings",
+    profile: "Profile",
+    logout: "Logout",
+
+    // Student Dashboard
+    studentDashboard: "Student Dashboard",
+    academicProgress: "Academic Progress",
+    currentGPA: "Current GPA",
+    creditsCompleted: "Credits Completed",
+    upcomingDeadlines: "Upcoming Deadlines",
+    groupActivities: "Group Activities",
+    recentGrades: "Recent Grades",
+    coursePerformance: "Course Performance",
+    deadlineTracker: "Deadline Tracker",
+    achievements: "Achievements",
+
+    // Lecturer Dashboard
+    lecturerDashboard: "Lecturer Dashboard",
+    todayClasses: "Today's Classes",
+    gradingBacklog: "Grading Backlog",
+    studentAlerts: "Student Alerts",
+    courseStats: "Course Statistics",
+    attendanceRate: "Attendance Rate",
+    averageGrade: "Average Grade",
+
+    // Coordinator Dashboard
+    coordinatorDashboard: "Coordinator Dashboard",
+    facultyStats: "Faculty Statistics",
+    schedulingTools: "Scheduling Tools",
+    bulkAnnouncements: "Bulk Announcements",
+    pendingApprovals: "Pending Approvals",
+    totalLecturers: "Total Lecturers",
+    activeCourses: "Active Courses",
+    totalStudents: "Total Students",
+
+    // Common Actions
+    view: "View",
+    edit: "Edit",
+    delete: "Delete",
+    save: "Save",
+    cancel: "Cancel",
+    submit: "Submit",
+    approve: "Approve",
+    reject: "Reject",
+    contact: "Contact",
+    details: "Details",
+    continue: "Continue",
+    complete: "Complete",
+    start: "Start",
+    finish: "Finish",
+
+    // Time and Dates
+    today: "Today",
+    tomorrow: "Tomorrow",
+    yesterday: "Yesterday",
+    thisWeek: "This Week",
+    nextWeek: "Next Week",
+    thisMonth: "This Month",
+    nextMonth: "Next Month",
+    daysAgo: "days ago",
+    hoursAgo: "hours ago",
+    minutesAgo: "minutes ago",
+
+    // Status
+    active: "Active",
+    inactive: "Inactive",
+    pending: "Pending",
+    completed: "Completed",
+    inProgress: "In Progress",
+    cancelled: "Cancelled",
+    approved: "Approved",
+    rejected: "Rejected",
+    urgent: "Urgent",
+    high: "High",
+    medium: "Medium",
+    low: "Low",
 
     // Common
     showPassword: "Show password",
@@ -105,7 +174,7 @@ export const translations = {
 
     // Features
     academicManagement: "Gestão Acadêmica",
-    academicDescription: "Acompanhe cursos, notas, tarefas e progresso acadêmico",
+    academicDescription: "Acompanhe disciplinas, notas, tarefas e progresso acadêmico",
     financialTracking: "Controle Financeiro",
     financialDescription: "Gerencie pagamentos de propinas, taxas e registros financeiros",
     communication: "Comunicação",
@@ -116,7 +185,7 @@ export const translations = {
     // University
     universityName: "Universidade São Tomás de Moçambique",
     universityDescription:
-      "Apoiando três faculdades: Ciências da Computação, Gestão de Negócios e Contabilidade. Construído especificamente para o sistema acadêmico moçambicano com integração de pagamento local.",
+      "Apoiando três faculdades: Ciências da Computação, Gestão de Negócios e Contabilidade. Construído especificamente para o sistema acadêmico moçambicano.",
 
     // Auth Forms
     fullName: "Nome Completo",
@@ -127,7 +196,7 @@ export const translations = {
     faculty: "Faculdade",
     student: "Estudante",
     lecturer: "Professor",
-    coordinator: "Pessoal Administrativo",
+    coordinator: "Coordenador",
     computerScience: "Ciências da Computação",
     businessManagement: "Gestão de Negócios",
     accounting: "Contabilidade",
@@ -165,18 +234,87 @@ export const translations = {
     success: "Sucesso",
     unexpectedError: "Ocorreu um erro inesperado",
 
-    // Dashboard
+    // Dashboard Common
     welcomeBack: "Bem-vindo de volta",
-    academicActivities: "Aqui está o que está acontecendo com suas atividades acadêmicas hoje.",
-    upcomingClasses: "Próximas Aulas",
-    assignmentsDue: "Tarefas Pendentes",
-    newAnnouncements: "Novos Anúncios",
-    balanceDue: "Saldo Devedor",
-    nextClass: "Próxima aula em",
-    nextDue: "Próximo vencimento em",
-    highPriority: "alta prioridade",
-    dueIn: "Vence em",
-    days: "dias",
+    loading: "Carregando...",
+    dashboard: "Painel",
+    overview: "Visão Geral",
+    settings: "Configurações",
+    profile: "Perfil",
+    logout: "Sair",
+
+    // Student Dashboard
+    studentDashboard: "Painel do Estudante",
+    academicProgress: "Progresso Acadêmico",
+    currentGPA: "Média Atual",
+    creditsCompleted: "Créditos Concluídos",
+    upcomingDeadlines: "Prazos Próximos",
+    groupActivities: "Atividades em Grupo",
+    recentGrades: "Notas Recentes",
+    coursePerformance: "Desempenho por Disciplina",
+    deadlineTracker: "Rastreador de Prazos",
+    achievements: "Conquistas",
+
+    // Lecturer Dashboard
+    lecturerDashboard: "Painel do Professor",
+    todayClasses: "Aulas de Hoje",
+    gradingBacklog: "Correções Pendentes",
+    studentAlerts: "Alertas de Estudantes",
+    courseStats: "Estatísticas do Curso",
+    attendanceRate: "Taxa de Frequência",
+    averageGrade: "Nota Média",
+
+    // Coordinator Dashboard
+    coordinatorDashboard: "Painel do Coordenador",
+    facultyStats: "Estatísticas da Faculdade",
+    schedulingTools: "Ferramentas de Agendamento",
+    bulkAnnouncements: "Comunicados em Massa",
+    pendingApprovals: "Aprovações Pendentes",
+    totalLecturers: "Total de Professores",
+    activeCourses: "Disciplinas Ativas",
+    totalStudents: "Total de Estudantes",
+
+    // Common Actions
+    view: "Ver",
+    edit: "Editar",
+    delete: "Excluir",
+    save: "Salvar",
+    cancel: "Cancelar",
+    submit: "Enviar",
+    approve: "Aprovar",
+    reject: "Rejeitar",
+    contact: "Contactar",
+    details: "Detalhes",
+    continue: "Continuar",
+    complete: "Concluir",
+    start: "Iniciar",
+    finish: "Finalizar",
+
+    // Time and Dates
+    today: "Hoje",
+    tomorrow: "Amanhã",
+    yesterday: "Ontem",
+    thisWeek: "Esta Semana",
+    nextWeek: "Próxima Semana",
+    thisMonth: "Este Mês",
+    nextMonth: "Próximo Mês",
+    daysAgo: "dias atrás",
+    hoursAgo: "horas atrás",
+    minutesAgo: "minutos atrás",
+
+    // Status
+    active: "Ativo",
+    inactive: "Inativo",
+    pending: "Pendente",
+    completed: "Concluído",
+    inProgress: "Em Andamento",
+    cancelled: "Cancelado",
+    approved: "Aprovado",
+    rejected: "Rejeitado",
+    urgent: "Urgente",
+    high: "Alta",
+    medium: "Média",
+    low: "Baixa",
 
     // Common
     showPassword: "Mostrar senha",

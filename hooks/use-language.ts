@@ -17,19 +17,15 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // Load language from localStorage on mount
-    if (typeof window !== "undefined") {
-      const savedLanguage = localStorage.getItem("uniconnect-language") as Language
-      if (savedLanguage && (savedLanguage === "en" || savedLanguage === "pt")) {
-        setLanguageState(savedLanguage)
-      }
+    const savedLanguage = localStorage.getItem("uniconnect-language") as Language
+    if (savedLanguage && (savedLanguage === "en" || savedLanguage === "pt")) {
+      setLanguageState(savedLanguage)
     }
   }, [])
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang)
-    if (typeof window !== "undefined") {
-      localStorage.setItem("uniconnect-language", lang)
-    }
+    localStorage.setItem("uniconnect-language", lang)
   }
 
   const t = (key: string): string => {

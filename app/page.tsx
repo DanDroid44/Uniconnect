@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client"
 import { SetupGuide } from "@/components/setup-guide"
 import { LandingPage } from "@/components/landing-page"
 
-export default function HomePage() {
+export default function Home() {
   const [isLoading, setIsLoading] = useState(true)
   const [hasEnvVars, setHasEnvVars] = useState(false)
   const router = useRouter()

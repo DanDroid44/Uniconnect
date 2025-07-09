@@ -9,32 +9,64 @@ const Tabs = TabsPrimitive.Root
 
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
->(({ className, ...props }, ref) => (
-  <TabsPrimitive.List
-    ref={ref}
-    className={cn(
-      "inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground",
-      className
-    )}
-    {...props}
-  />
-))
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List> & {
+    variant?: "default" | "student" | "lecturer" | "coordinator"
+  }
+>(({ className, variant = "default", ...props }, ref) => {
+  const getVariantStyles = () => {
+    switch (variant) {
+      case "student":
+        return "bg-green-50 text-green-600 data-[state=active]:bg-green-600 data-[state=active]:text-white"
+      case "lecturer":
+        return "bg-blue-50 text-blue-600 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+      case "coordinator":
+        return "bg-violet-50 text-violet-600 data-[state=active]:bg-violet-600 data-[state=active]:text-white"
+      default:
+        return "bg-muted text-muted-foreground"
+    }
+  }
+
+  return (
+    <TabsPrimitive.List
+      ref={ref}
+      className={cn("inline-flex h-10 items-center justify-center rounded-md p-1", getVariantStyles(), className)}
+      {...props}
+    />
+  )
+})
 TabsList.displayName = TabsPrimitive.List.displayName
 
 const TabsTrigger = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
->(({ className, ...props }, ref) => (
-  <TabsPrimitive.Trigger
-    ref={ref}
-    className={cn(
-      "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
-      className
-    )}
-    {...props}
-  />
-))
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger> & {
+    variant?: "default" | "student" | "lecturer" | "coordinator"
+  }
+>(({ className, variant = "default", ...props }, ref) => {
+  const getVariantStyles = () => {
+    switch (variant) {
+      case "student":
+        return "data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-sm focus-visible:ring-green-500"
+      case "lecturer":
+        return "data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm focus-visible:ring-blue-500"
+      case "coordinator":
+        return "data-[state=active]:bg-violet-600 data-[state=active]:text-white data-[state=active]:shadow-sm focus-visible:ring-violet-500"
+      default:
+        return "data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+    }
+  }
+
+  return (
+    <TabsPrimitive.Trigger
+      ref={ref}
+      className={cn(
+        "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+        getVariantStyles(),
+        className,
+      )}
+      {...props}
+    />
+  )
+})
 TabsTrigger.displayName = TabsPrimitive.Trigger.displayName
 
 const TabsContent = React.forwardRef<
@@ -45,7 +77,7 @@ const TabsContent = React.forwardRef<
     ref={ref}
     className={cn(
       "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-      className
+      className,
     )}
     {...props}
   />
