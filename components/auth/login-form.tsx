@@ -1,80 +1,50 @@
 "use client"
 
-import type React from "react"
 import { useState } from "react"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { createClient } from "@/lib/supabase/client"
+import { loginSchema, type LoginFormData } from "@/lib/validation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PasswordInput } from "@/components/ui/password-input"
-import { LanguageSwitcher } from "@/components/language-switcher"
-import { createClient } from "@/lib/supabase/client"
-import { toast } from "@/hooks/use-toast"
-import { useLanguage } from "@/hooks/use-language"
-import { validateEmail, validatePassword } from "@/lib/validation"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Loader2, LogIn } from "lucide-react"
 
 export function LoginForm() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
-  const supabase = createClient()
-  const { t } = useLanguage()
 
-  const validateForm = () => {
-    const newErrors: { email?: string; password?: string } = {}
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  })
 
-    const emailValidation = validateEmail(email)
-    if (!emailValidation.isValid) {
-      newErrors.email = emailValidation.error
-    }
-
-    const passwordValidation = validatePassword(password)
-    if (!passwordValidation.isValid) {
-      newErrors.password = passwordValidation.error
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!validateForm()) {
-      return
-    }
-
+  const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true)
+    setError(null)
 
     try {
+      const supabase = createClient()
       const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: data.email,
+        password: data.password,
       })
 
       if (error) {
-        toast({
-          title: t("error"),
-          description: error.message,
-          variant: "destructive",
-        })
+        setError(error.message)
       } else {
-        toast({
-          title: t("success"),
-          description: t("loginSuccess"),
-        })
         router.push("/dashboard")
+        router.refresh()
       }
-    } catch (error) {
-      toast({
-        title: t("error"),
-        description: t("unexpectedError"),
-        variant: "destructive",
-      })
+    } catch (err) {
+      setError("Ocorreu um erro inesperado. Tente novamente.")
     } finally {
       setIsLoading(false)
     }
@@ -82,70 +52,59 @@ export function LoginForm() {
 
   return (
     <Card className="w-full max-w-md">
-      <CardHeader className="text-center">
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex-1" />
-          <CardTitle className="text-2xl">{t("signInTitle")}</CardTitle>
-          <div className="flex-1 flex justify-end">
-            <LanguageSwitcher />
-          </div>
-        </div>
-        <CardDescription>{t("signInDescription")}</CardDescription>
+      <CardHeader className="space-y-1">
+        <CardTitle className="text-2xl font-bold text-center">Entrar</CardTitle>
+        <CardDescription className="text-center">Digite suas credenciais para acessar sua conta</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
           <div className="space-y-2">
-            <Label htmlFor="email">{t("email")}</Label>
+            <label htmlFor="email" className="text-sm font-medium">
+              Email
+            </label>
             <Input
               id="email"
               type="email"
-              placeholder="your@email.com"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value)
-                if (errors.email) {
-                  setErrors({ ...errors, email: undefined })
-                }
-              }}
-              className={errors.email ? "border-red-500" : ""}
+              placeholder="seu.email@ust.ac.mz"
+              {...register("email")}
+              disabled={isLoading}
             />
-            {errors.email && <p className="text-sm text-red-500">{t(errors.email)}</p>}
+            {errors.email && <p className="text-sm text-red-600">{errors.email.message}</p>}
           </div>
+
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password">{t("password")}</Label>
-              <Link href="/auth/forgot-password" className="text-sm text-blue-600 hover:underline">
-                {t("forgotPassword")}
-              </Link>
-            </div>
+            <label htmlFor="password" className="text-sm font-medium">
+              Senha
+            </label>
             <PasswordInput
               id="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value)
-                if (errors.password) {
-                  setErrors({ ...errors, password: undefined })
-                }
-              }}
-              showPasswordLabel={t("showPassword")}
-              hidePasswordLabel={t("hidePassword")}
-              className={errors.password ? "border-red-500" : ""}
+              placeholder="Digite sua senha"
+              {...register("password")}
+              disabled={isLoading}
             />
-            {errors.password && <p className="text-sm text-red-500">{t(errors.password)}</p>}
+            {errors.password && <p className="text-sm text-red-600">{errors.password.message}</p>}
           </div>
-          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
-            {isLoading ? t("signingIn") : t("signIn")}
+
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Entrando...
+              </>
+            ) : (
+              <>
+                <LogIn className="mr-2 h-4 w-4" />
+                Entrar
+              </>
+            )}
           </Button>
         </form>
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
-            {t("dontHaveAccount")}{" "}
-            <Link href="/auth/register" className="text-blue-600 hover:underline">
-              {t("createAccount")}
-            </Link>
-          </p>
-        </div>
       </CardContent>
     </Card>
   )

@@ -1,70 +1,115 @@
 "use client"
 
-import { Home, Calendar, BookOpen, GraduationCap, CreditCard, User, Settings } from "lucide-react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+import type * as React from "react"
+import { GraduationCap, Home, BookOpen, FileText, CreditCard, User, Settings, Calendar } from "lucide-react"
+
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
-const menuItems = [
-  { title: "Dashboard", url: "/dashboard", icon: Home },
-  { title: "Schedule", url: "/dashboard/schedule", icon: Calendar },
-  { title: "Courses", url: "/dashboard/courses", icon: BookOpen },
-  { title: "Grades", url: "/dashboard/grades", icon: GraduationCap },
-  { title: "Finance", url: "/dashboard/finance", icon: CreditCard },
-  { title: "Profile", url: "/dashboard/profile", icon: User },
-  { title: "Settings", url: "/dashboard/settings", icon: Settings },
+// Navigation items for students
+const studentNavigation = [
+  {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: Home,
+  },
+  {
+    title: "Cursos",
+    url: "/dashboard/courses",
+    icon: BookOpen,
+  },
+  {
+    title: "Notas",
+    url: "/dashboard/grades",
+    icon: FileText,
+  },
+  {
+    title: "Finanças",
+    url: "/dashboard/finance",
+    icon: CreditCard,
+  },
+  {
+    title: "Horário",
+    url: "/dashboard/schedule",
+    icon: Calendar,
+  },
 ]
 
-export function AppSidebar() {
-  const pathname = usePathname()
+const accountItems = [
+  {
+    title: "Perfil",
+    url: "/dashboard/profile",
+    icon: User,
+  },
+  {
+    title: "Configurações",
+    url: "/dashboard/settings",
+    icon: Settings,
+  },
+]
 
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar collapsible="icon" className="border-r">
-      <SidebarHeader className="p-4">
-        <div className="flex items-center justify-center">
-          <Link href="/dashboard" className="flex items-center space-x-2">
-            <span className="text-xl font-bold text-blue-600 group-data-[collapsible=icon]:hidden">UniConnect</span>
-            <span className="text-xl font-bold text-blue-600 group-data-[collapsible=icon]:block hidden">UC</span>
-          </Link>
+    <Sidebar {...props}>
+      <SidebarHeader>
+        <div className="flex items-center gap-2 px-2 py-1">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-r from-blue-600 to-purple-600">
+            <GraduationCap className="h-4 w-4 text-white" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm font-semibold">UniConnect</span>
+            <span className="text-xs text-muted-foreground">Estudante</span>
+          </div>
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="px-2">
-        <SidebarMenu>
-          {menuItems.map((item) => (
-            <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild isActive={pathname === item.url} tooltip={item.title}>
-                <Link href={item.url} className="flex items-center space-x-3 px-3 py-2">
-                  <item.icon className="h-5 w-5" />
-                  <span>{item.title}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
-      </SidebarContent>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Acadêmico</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {studentNavigation.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <a href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
 
-      <SidebarFooter className="p-4">
-        <div className="flex items-center space-x-3 p-2 rounded-lg bg-gray-50 group-data-[collapsible=icon]:justify-center">
-          <Avatar className="h-8 w-8">
-            <AvatarFallback>DD</AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0 group-data-[collapsible=icon]:hidden">
-            <p className="text-sm font-medium text-gray-900 truncate">Daniel Darsamo</p>
-            <p className="text-xs text-gray-500 truncate">Student</p>
-          </div>
-        </div>
-      </SidebarFooter>
+        <SidebarGroup>
+          <SidebarGroupLabel>Conta</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {accountItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <a href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
 
       <SidebarRail />
     </Sidebar>

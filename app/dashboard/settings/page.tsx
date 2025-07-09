@@ -1,291 +1,287 @@
 "use client"
 
-import { Badge } from "@/components/ui/badge"
-
 import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { PasswordInput } from "@/components/ui/password-input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { LanguageSwitcher } from "@/components/language-switcher"
-import { useLanguage } from "@/hooks/use-language"
-import { Lock, Mail, Bell, Shield, Globe, Save } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { PasswordInput } from "@/components/ui/password-input"
+import { Settings, Bell, Shield, Globe, Moon, Sun, Smartphone, Mail, Lock, Save, Trash2, Download } from "lucide-react"
 
 export default function SettingsPage() {
-  const { t } = useLanguage()
-  const [currentPassword, setCurrentPassword] = useState("")
-  const [newPassword, setNewPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [newEmail, setNewEmail] = useState("daniel.darsamo@stu.edu.mz")
-
   const [notifications, setNotifications] = useState({
-    emailNotifications: true,
-    pushNotifications: true,
-    smsNotifications: false,
-    announcementNotifications: true,
-    gradeNotifications: true,
-    paymentReminders: true,
+    email: true,
+    push: false,
+    grades: true,
+    assignments: true,
+    announcements: false,
+    reminders: true,
   })
 
   const [privacy, setPrivacy] = useState({
-    profileVisibility: true,
+    profileVisible: true,
     showEmail: false,
     showPhone: false,
     allowMessages: true,
   })
 
-  const handlePasswordChange = () => {
-    if (newPassword !== confirmPassword) {
-      alert("Passwords do not match!")
-      return
-    }
-    // Handle password change logic here
-    console.log("Changing password...")
-  }
-
-  const handleEmailChange = () => {
-    // Handle email change logic here
-    console.log("Changing email to:", newEmail)
-  }
+  const [theme, setTheme] = useState("light")
+  const [language, setLanguage] = useState("pt")
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-        <p className="text-gray-600 mt-1">Manage your account settings and preferences</p>
+        <h1 className="text-3xl font-bold text-gray-900">Configurações</h1>
+        <p className="text-gray-600 mt-1">Gerencie suas preferências e configurações da conta</p>
       </div>
 
-      <Tabs defaultValue="security" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="security">Security</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="privacy">Privacy</TabsTrigger>
-          <TabsTrigger value="language">Language</TabsTrigger>
+      <Tabs defaultValue="general" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="general" className="flex items-center gap-2">
+            <Settings className="w-4 h-4" />
+            Geral
+          </TabsTrigger>
+          <TabsTrigger value="notifications" className="flex items-center gap-2">
+            <Bell className="w-4 h-4" />
+            Notificações
+          </TabsTrigger>
+          <TabsTrigger value="privacy" className="flex items-center gap-2">
+            <Shield className="w-4 h-4" />
+            Privacidade
+          </TabsTrigger>
+          <TabsTrigger value="security" className="flex items-center gap-2">
+            <Lock className="w-4 h-4" />
+            Segurança
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="security" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Change Password */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Lock className="h-5 w-5" />
-                  <span>Change Password</span>
-                </CardTitle>
-                <CardDescription>Update your account password</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="currentPassword">Current Password</Label>
-                  <PasswordInput
-                    id="currentPassword"
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    placeholder="Enter current password"
-                    showPasswordLabel={t("showPassword")}
-                    hidePasswordLabel={t("hidePassword")}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="newPassword">New Password</Label>
-                  <PasswordInput
-                    id="newPassword"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Enter new password"
-                    showPasswordLabel={t("showPassword")}
-                    hidePasswordLabel={t("hidePassword")}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                  <PasswordInput
-                    id="confirmPassword"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Confirm new password"
-                    showPasswordLabel={t("showPassword")}
-                    hidePasswordLabel={t("hidePassword")}
-                  />
-                </div>
-
-                <Button onClick={handlePasswordChange} className="w-full">
-                  <Save className="h-4 w-4 mr-2" />
-                  Update Password
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Change Email */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Mail className="h-5 w-5" />
-                  <span>Change Email</span>
-                </CardTitle>
-                <CardDescription>Update your email address</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="currentEmail">Current Email</Label>
-                  <Input id="currentEmail" value="daniel.darsamo@stu.edu.mz" disabled />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="newEmail">New Email</Label>
-                  <Input
-                    id="newEmail"
-                    type="email"
-                    value={newEmail}
-                    onChange={(e) => setNewEmail(e.target.value)}
-                    placeholder="Enter new email address"
-                  />
-                </div>
-
-                <Button onClick={handleEmailChange} className="w-full">
-                  <Save className="h-4 w-4 mr-2" />
-                  Update Email
-                </Button>
-
-                <p className="text-sm text-gray-600">
-                  You will receive a verification email at your new address to confirm the change.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="notifications" className="space-y-6">
+        {/* General Settings */}
+        <TabsContent value="general" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Bell className="h-5 w-5" />
-                <span>Notification Preferences</span>
+              <CardTitle className="flex items-center gap-2">
+                <Globe className="w-5 h-5" />
+                Preferências Gerais
               </CardTitle>
-              <CardDescription>Choose how you want to receive notifications</CardDescription>
+              <CardDescription>Configure idioma, tema e outras preferências</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="emailNotifications">Email Notifications</Label>
-                    <p className="text-sm text-gray-600">Receive notifications via email</p>
-                  </div>
-                  <Switch
-                    id="emailNotifications"
-                    checked={notifications.emailNotifications}
-                    onCheckedChange={(checked) => setNotifications({ ...notifications, emailNotifications: checked })}
-                  />
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Idioma</label>
+                  <Select value={language} onValueChange={setLanguage}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pt">Português</SelectItem>
+                      <SelectItem value="en">English</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="pushNotifications">Push Notifications</Label>
-                    <p className="text-sm text-gray-600">Receive push notifications in your browser</p>
-                  </div>
-                  <Switch
-                    id="pushNotifications"
-                    checked={notifications.pushNotifications}
-                    onCheckedChange={(checked) => setNotifications({ ...notifications, pushNotifications: checked })}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="smsNotifications">SMS Notifications</Label>
-                    <p className="text-sm text-gray-600">Receive notifications via SMS</p>
-                  </div>
-                  <Switch
-                    id="smsNotifications"
-                    checked={notifications.smsNotifications}
-                    onCheckedChange={(checked) => setNotifications({ ...notifications, smsNotifications: checked })}
-                  />
-                </div>
-
-                <hr />
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="announcementNotifications">Announcements</Label>
-                    <p className="text-sm text-gray-600">Get notified about new announcements</p>
-                  </div>
-                  <Switch
-                    id="announcementNotifications"
-                    checked={notifications.announcementNotifications}
-                    onCheckedChange={(checked) =>
-                      setNotifications({ ...notifications, announcementNotifications: checked })
-                    }
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="gradeNotifications">Grade Updates</Label>
-                    <p className="text-sm text-gray-600">Get notified when grades are posted</p>
-                  </div>
-                  <Switch
-                    id="gradeNotifications"
-                    checked={notifications.gradeNotifications}
-                    onCheckedChange={(checked) => setNotifications({ ...notifications, gradeNotifications: checked })}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="paymentReminders">Payment Reminders</Label>
-                    <p className="text-sm text-gray-600">Get reminded about upcoming payments</p>
-                  </div>
-                  <Switch
-                    id="paymentReminders"
-                    checked={notifications.paymentReminders}
-                    onCheckedChange={(checked) => setNotifications({ ...notifications, paymentReminders: checked })}
-                  />
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Tema</label>
+                  <Select value={theme} onValueChange={setTheme}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="light">
+                        <div className="flex items-center gap-2">
+                          <Sun className="w-4 h-4" />
+                          Claro
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="dark">
+                        <div className="flex items-center gap-2">
+                          <Moon className="w-4 h-4" />
+                          Escuro
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="system">Sistema</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
-              <Button className="w-full">
-                <Save className="h-4 w-4 mr-2" />
-                Save Notification Settings
-              </Button>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Modo Compacto</p>
+                  <p className="text-sm text-gray-600">Reduz o espaçamento da interface</p>
+                </div>
+                <Switch />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Animações</p>
+                  <p className="text-sm text-gray-600">Ativa animações na interface</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Dados da Conta</CardTitle>
+              <CardDescription>Exporte ou gerencie seus dados</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div>
+                  <p className="font-medium">Exportar Dados</p>
+                  <p className="text-sm text-gray-600">Baixe uma cópia dos seus dados</p>
+                </div>
+                <Button variant="outline" size="sm">
+                  <Download className="w-4 h-4 mr-2" />
+                  Exportar
+                </Button>
+              </div>
+
+              <div className="flex items-center justify-between p-4 border rounded-lg border-red-200">
+                <div>
+                  <p className="font-medium text-red-700">Excluir Conta</p>
+                  <p className="text-sm text-red-600">Esta ação não pode ser desfeita</p>
+                </div>
+                <Button variant="destructive" size="sm">
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Excluir
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
+        {/* Notifications */}
+        <TabsContent value="notifications" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Bell className="w-5 h-5" />
+                Preferências de Notificação
+              </CardTitle>
+              <CardDescription>Configure como e quando receber notificações</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <h4 className="font-medium">Canais de Notificação</h4>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Mail className="w-5 h-5 text-gray-500" />
+                    <div>
+                      <p className="font-medium">Email</p>
+                      <p className="text-sm text-gray-600">Receber notificações por email</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={notifications.email}
+                    onCheckedChange={(checked) => setNotifications({ ...notifications, email: checked })}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Smartphone className="w-5 h-5 text-gray-500" />
+                    <div>
+                      <p className="font-medium">Push</p>
+                      <p className="text-sm text-gray-600">Notificações push no navegador</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={notifications.push}
+                    onCheckedChange={(checked) => setNotifications({ ...notifications, push: checked })}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="font-medium">Tipos de Notificação</h4>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Notas e Avaliações</p>
+                      <p className="text-sm text-gray-600">Quando novas notas forem publicadas</p>
+                    </div>
+                    <Switch
+                      checked={notifications.grades}
+                      onCheckedChange={(checked) => setNotifications({ ...notifications, grades: checked })}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Trabalhos e Tarefas</p>
+                      <p className="text-sm text-gray-600">Novos trabalhos e prazos</p>
+                    </div>
+                    <Switch
+                      checked={notifications.assignments}
+                      onCheckedChange={(checked) => setNotifications({ ...notifications, assignments: checked })}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Anúncios</p>
+                      <p className="text-sm text-gray-600">Comunicados da universidade</p>
+                    </div>
+                    <Switch
+                      checked={notifications.announcements}
+                      onCheckedChange={(checked) => setNotifications({ ...notifications, announcements: checked })}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Lembretes</p>
+                      <p className="text-sm text-gray-600">Lembretes de prazos e eventos</p>
+                    </div>
+                    <Switch
+                      checked={notifications.reminders}
+                      onCheckedChange={(checked) => setNotifications({ ...notifications, reminders: checked })}
+                    />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Privacy */}
         <TabsContent value="privacy" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Shield className="h-5 w-5" />
-                <span>Privacy Settings</span>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="w-5 h-5" />
+                Configurações de Privacidade
               </CardTitle>
-              <CardDescription>Control your privacy and data sharing preferences</CardDescription>
+              <CardDescription>Controle quem pode ver suas informações</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label htmlFor="profileVisibility">Profile Visibility</Label>
-                    <p className="text-sm text-gray-600">Make your profile visible to other students</p>
+                    <p className="font-medium">Perfil Público</p>
+                    <p className="text-sm text-gray-600">Permitir que outros vejam seu perfil</p>
                   </div>
                   <Switch
-                    id="profileVisibility"
-                    checked={privacy.profileVisibility}
-                    onCheckedChange={(checked) => setPrivacy({ ...privacy, profileVisibility: checked })}
+                    checked={privacy.profileVisible}
+                    onCheckedChange={(checked) => setPrivacy({ ...privacy, profileVisible: checked })}
                   />
                 </div>
 
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label htmlFor="showEmail">Show Email</Label>
-                    <p className="text-sm text-gray-600">Display your email address on your profile</p>
+                    <p className="font-medium">Mostrar Email</p>
+                    <p className="text-sm text-gray-600">Exibir email no perfil público</p>
                   </div>
                   <Switch
-                    id="showEmail"
                     checked={privacy.showEmail}
                     onCheckedChange={(checked) => setPrivacy({ ...privacy, showEmail: checked })}
                   />
@@ -293,11 +289,10 @@ export default function SettingsPage() {
 
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label htmlFor="showPhone">Show Phone Number</Label>
-                    <p className="text-sm text-gray-600">Display your phone number on your profile</p>
+                    <p className="font-medium">Mostrar Telefone</p>
+                    <p className="text-sm text-gray-600">Exibir telefone no perfil público</p>
                   </div>
                   <Switch
-                    id="showPhone"
                     checked={privacy.showPhone}
                     onCheckedChange={(checked) => setPrivacy({ ...privacy, showPhone: checked })}
                   />
@@ -305,75 +300,100 @@ export default function SettingsPage() {
 
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label htmlFor="allowMessages">Allow Messages</Label>
-                    <p className="text-sm text-gray-600">Allow other users to send you messages</p>
+                    <p className="font-medium">Permitir Mensagens</p>
+                    <p className="text-sm text-gray-600">Outros usuários podem enviar mensagens</p>
                   </div>
                   <Switch
-                    id="allowMessages"
                     checked={privacy.allowMessages}
                     onCheckedChange={(checked) => setPrivacy({ ...privacy, allowMessages: checked })}
                   />
                 </div>
               </div>
-
-              <Button className="w-full">
-                <Save className="h-4 w-4 mr-2" />
-                Save Privacy Settings
-              </Button>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="language" className="space-y-6">
+        {/* Security */}
+        <TabsContent value="security" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Globe className="h-5 w-5" />
-                <span>Language & Region</span>
+              <CardTitle className="flex items-center gap-2">
+                <Lock className="w-5 h-5" />
+                Segurança da Conta
               </CardTitle>
-              <CardDescription>Choose your preferred language and regional settings</CardDescription>
+              <CardDescription>Gerencie a segurança da sua conta</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
                 <div>
-                  <Label>Language</Label>
-                  <p className="text-sm text-gray-600 mb-3">Select your preferred language for the interface</p>
-                  <LanguageSwitcher />
-                </div>
-
-                <div>
-                  <Label>Currency</Label>
-                  <p className="text-sm text-gray-600 mb-3">Financial amounts will be displayed in</p>
-                  <div className="flex items-center space-x-2">
-                    <span className="font-medium">Mozambican Metical (MT)</span>
-                    <Badge variant="outline">Default</Badge>
+                  <h4 className="font-medium mb-3">Alterar Senha</h4>
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Senha Atual</label>
+                      <PasswordInput placeholder="Digite sua senha atual" />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Nova Senha</label>
+                      <PasswordInput placeholder="Digite a nova senha" />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Confirmar Nova Senha</label>
+                      <PasswordInput placeholder="Confirme a nova senha" />
+                    </div>
+                    <Button size="sm">
+                      <Save className="w-4 h-4 mr-2" />
+                      Alterar Senha
+                    </Button>
                   </div>
                 </div>
 
-                <div>
-                  <Label>Date Format</Label>
-                  <p className="text-sm text-gray-600 mb-3">Choose how dates are displayed</p>
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <input type="radio" id="date-dmy" name="dateFormat" defaultChecked />
-                      <Label htmlFor="date-dmy">DD/MM/YYYY (15/03/2025)</Label>
+                <div className="border-t pt-4">
+                  <h4 className="font-medium mb-3">Sessões Ativas</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                      <div>
+                        <p className="font-medium">Chrome - Windows</p>
+                        <p className="text-sm text-gray-600">Maputo, Moçambique • Ativo agora</p>
+                      </div>
+                      <Badge variant="secondary">Atual</Badge>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <input type="radio" id="date-mdy" name="dateFormat" />
-                      <Label htmlFor="date-mdy">MM/DD/YYYY (03/15/2025)</Label>
+
+                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                      <div>
+                        <p className="font-medium">Safari - iPhone</p>
+                        <p className="text-sm text-gray-600">Maputo, Moçambique • Há 2 horas</p>
+                      </div>
+                      <Button variant="outline" size="sm">
+                        Encerrar
+                      </Button>
                     </div>
+                  </div>
+                </div>
+
+                <div className="border-t pt-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Autenticação de Dois Fatores</p>
+                      <p className="text-sm text-gray-600">Adicione uma camada extra de segurança</p>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      Configurar
+                    </Button>
                   </div>
                 </div>
               </div>
-
-              <Button className="w-full">
-                <Save className="h-4 w-4 mr-2" />
-                Save Language Settings
-              </Button>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Save Button */}
+      <div className="flex justify-end">
+        <Button>
+          <Save className="w-4 h-4 mr-2" />
+          Salvar Configurações
+        </Button>
+      </div>
     </div>
   )
 }
